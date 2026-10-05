@@ -21,6 +21,7 @@ class Game
     GAME_STATUS game_over;
     Ability *around;
     Ability *range;
+    Ability *heal;
 
   public:
     Game(Map &map, Robot &player_robot);

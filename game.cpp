@@ -2,6 +2,7 @@
 #include "ability.hpp"
 #include "around_ab.hpp"
 #include "factory.hpp"
+#include "heal_ab.hpp"
 #include "range_ab.hpp"
 #include <raylib.h>
 
@@ -11,6 +12,7 @@ Game::Game(Map &map, Robot &player_robot)
 {
     around = new Around_ab(1, 10, 20);
     range = new Range_ab(3, 20, 25);
+    heal = new Heal_ab(0, 15, 20);
 }
 
 void Game::player_turn(Render &render)
@@ -19,6 +21,7 @@ void Game::player_turn(Render &render)
     {
         around->use(player_robot, map, 0, 0);
     }
+
     if (IsKeyPressed(KEY_TWO))
     {
         Vector2 mouse = GetMousePosition();
@@ -27,6 +30,11 @@ void Game::player_turn(Render &render)
         int y = mouse.y / render.get_draw_scale();
 
         range->use(player_robot, map, x, y);
+    }
+
+    if (IsKeyPressed(KEY_THREE))
+    {
+        heal->use(player_robot, map, 0, 0);
     }
 
     if (player_robot.get_ap() <= 0)
