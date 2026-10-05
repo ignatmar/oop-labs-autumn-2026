@@ -5,14 +5,11 @@
 #include <cstdlib>
 #include <vector>
 
-int Map::check_coords(int x, int y)
-{
-    return (y < height && y >= 0 && x < width && x >= 0);
-}
+int Map::check_coords(size_t x, size_t y) { return (y < height && x < width); }
 
-Map::Map(int width, int height, std::vector<std::vector<char>> field,
+Map::Map(size_t width, size_t height, std::vector<std::vector<char>> field,
          std::vector<Robot *> &enemy_robots, std::vector<Factory *> &factories)
-    : enemy_robots(enemy_robots), factories(factories), steps(0)
+    : steps(0), enemy_robots(enemy_robots), factories(factories)
 {
     if (width < MIN_MAP_SIZE)
     {
@@ -37,9 +34,9 @@ Map::Map(int width, int height, std::vector<std::vector<char>> field,
     this->field = std::vector<std::vector<Cell>>(
         height, std::vector<Cell>(width, Cell('.')));
 
-    for (int i = 0; i < height && i < field.size(); i++)
+    for (size_t i = 0; i < height && i < field.size(); i++)
     {
-        for (int j = 0; j < width && j < field[0].size(); j++)
+        for (size_t j = 0; j < width && j < field[0].size(); j++)
         {
             this->field[i][j] = Cell(field[i][j]);
         }
@@ -83,7 +80,7 @@ Cell &Map::get_cell(int x, int y) { return field[y][x]; }
 
 const std::vector<Robot *> &Map::get_enemy_robots() { return enemy_robots; }
 
-void Map::set_factory(Factory factory, int x, int y)
+void Map::set_factory(size_t x, size_t y)
 {
     if (!(x > 0 && y > 0 && x < width - 1 && y < height - 1 &&
           field[y][x].get_robot() == nullptr &&
@@ -107,13 +104,13 @@ void Map::add_step() { steps++; }
 
 const std::vector<Factory *> &Map::get_factories() { return factories; }
 
-void Map::update_vision(int vision, int x, int y)
+void Map::update_vision(int vision, size_t x, size_t y)
 {
-    for (int yi = 0; yi < height; yi++)
+    for (size_t yi = 0; yi < height; yi++)
     {
-        for (int xi = 0; xi < width; xi++)
+        for (size_t xi = 0; xi < width; xi++)
         {
-            if (std::abs(x - xi) + std::abs(y - yi) <= vision)
+            if (std::abs((int)(x - xi)) + std::abs(int(y - yi)) <= vision)
             {
                 field[yi][xi].make_visible();
             }

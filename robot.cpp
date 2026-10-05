@@ -15,9 +15,9 @@ int Robot::normalize(int x, int min_x, int max_x)
 
 Robot::Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max,
              int team, int vision, bool visible)
-    : x(0), y(0), hp(hp_max), hp_max(hp_max), speed(speed), ap(speed * 2),
-      ap_max(speed * 2), dmg(dmg), mana(mana_max), mana_max(mana_max), exp(0),
-      exp_max(exp_max), team(team), lvl(0), kills(0), vision(vision),
+    : hp(hp_max), hp_max(hp_max), dmg(dmg), mana(mana_max), mana_max(mana_max),
+      exp(0), exp_max(exp_max), lvl(0), x(0), y(0), team(team), ap(speed * 2),
+      ap_max(speed * 2), kills(0), speed(speed), vision(vision),
       visible(visible)
 {
 }
@@ -118,7 +118,7 @@ int Robot::get_max_hp() { return hp_max; }
 
 int Robot::get_max_ap() { return ap_max; }
 
-int Robot::get_kills() { return kills; }
+size_t Robot::get_kills() { return kills; }
 
 void Robot::add_kill() { kills++; }
 

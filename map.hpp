@@ -8,27 +8,27 @@
 class Map
 {
   private:
-    int width;
-    int height;
+    size_t width;
+    size_t height;
     int steps;
     std::vector<std::vector<Cell>> field;
     std::vector<Robot *> &enemy_robots;
     std::vector<Factory *> &factories;
 
   public:
-    Map(int width, int height, std::vector<std::vector<char>> field,
+    Map(size_t width, size_t height, std::vector<std::vector<char>> field,
         std::vector<Robot *> &enemy_robots, std::vector<Factory *> &factories);
     void move_robot(Robot *robot, int new_x, int new_y);
     int get_width();
     int get_height();
-    int check_coords(int x, int y);
+    int check_coords(size_t x, size_t y);
     Cell &get_cell(int x, int y);
     const std::vector<Robot *> &get_enemy_robots();
-    void set_factory(Factory factory, int x, int y);
+    void set_factory(size_t x, size_t y);
     int get_steps();
     void push_enemy(Robot *robot);
     void remove_enemy(Robot *robot);
     void add_step();
     const std::vector<Factory *> &get_factories();
-    void update_vision(int vision, int x, int y);
+    void update_vision(int vision, size_t x, size_t y);
 };

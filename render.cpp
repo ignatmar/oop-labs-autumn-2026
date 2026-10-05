@@ -124,7 +124,7 @@ void Render::draw_ap_text(Map &map, Robot &player,
 
     int y = 200;
 
-    for (int i = 0; i < enemy_robots.size(); i++)
+    for (size_t i = 0; i < enemy_robots.size(); i++)
     {
         std::string name = "ENEMY " + std::to_string(i + 1);
 

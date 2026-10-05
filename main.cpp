@@ -37,7 +37,7 @@ int main()
     map.get_cell(20, 20).set_robot(&enemy_2);
     map.get_cell(22, 5).set_robot(&enemy_3);
 
-    map.set_factory(factory_1, 23, 6);
+    map.set_factory(23, 6);
 
     Game game(map, player);
 

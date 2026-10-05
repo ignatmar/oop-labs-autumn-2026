@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdlib>
 
 class Robot
 {
@@ -15,7 +16,7 @@ class Robot
     int team;
     int ap;
     int ap_max;
-    int kills;
+    size_t kills;
     int speed;
     int vision;
     bool visible;
@@ -44,7 +45,7 @@ class Robot
     int get_hp();
     int get_max_ap();
     int get_max_hp();
-    int get_kills();
+    size_t get_kills();
     void add_kill();
     int get_vision();
     bool if_visible();
