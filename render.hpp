@@ -29,4 +29,6 @@ class Render
     void draw_game_over(int game_over);
 
     void draw_abilities(Map &map);
+
+    int get_draw_scale();
 };

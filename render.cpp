@@ -255,3 +255,5 @@ void Render::draw_game_over(int game_over)
         DrawText("DEFEAT", width / 2 - 200, height / 2 - 60, 80, RED);
     }
 }
+
+int Render::get_draw_scale() { return draw_scale; }

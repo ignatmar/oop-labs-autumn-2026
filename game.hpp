@@ -20,14 +20,15 @@ class Game
     double enemy_move_timer;
     GAME_STATUS game_over;
     Ability *around;
+    Ability *range;
 
   public:
     Game(Map &map, Robot &player_robot);
     void run(Render &render);
     int get_turn();
-    void player_turn();
+    void player_turn(Render &render);
     void enemy_turn(Robot *enemy);
     void end_turn();
-    void update();
+    void update(Render &render);
     void kill_enemy(Robot *enemy);
 };

@@ -2,18 +2,31 @@
 #include "ability.hpp"
 #include "around_ab.hpp"
 #include "factory.hpp"
+#include "range_ab.hpp"
+#include <raylib.h>
+
 Game::Game(Map &map, Robot &player_robot)
     : map(map), player_robot(player_robot), turn(1), enemy_move_timer(0),
       game_over(GAME_RUNNING)
 {
     around = new Around_ab(1, 10, 20);
+    range = new Range_ab(3, 20, 25);
 }
 
-void Game::player_turn()
+void Game::player_turn(Render &render)
 {
     if (IsKeyPressed(KEY_ONE))
     {
         around->use(player_robot, map, 0, 0);
+    }
+    if (IsKeyPressed(KEY_TWO))
+    {
+        Vector2 mouse = GetMousePosition();
+
+        int x = mouse.x / render.get_draw_scale();
+        int y = mouse.y / render.get_draw_scale();
+
+        range->use(player_robot, map, x, y);
     }
 
     if (player_robot.get_ap() <= 0)
@@ -57,7 +70,7 @@ void Game::end_turn()
     }
 }
 
-void Game::update()
+void Game::update(Render &render)
 {
     map.update_vision(player_robot.get_vision(), player_robot.get_x(),
                       player_robot.get_y());
@@ -70,7 +83,7 @@ void Game::update()
 
     if (turn == 1)
     {
-        player_turn();
+        player_turn(render);
     }
     else
     {
@@ -127,7 +140,7 @@ void Game::run(Render &render)
                                    player_robot.get_y());
             }
 
-            update();
+            update(render);
 
             if (player_robot.get_kills() == map.get_enemy_robots().size())
             {
