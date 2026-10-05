@@ -33,3 +33,6 @@ void Heal_ab::upgrade()
     level++;
     delta_hp++;
 }
+
+bool Heal_ab::is_unlocked() { return unlocked; }
+void Heal_ab::unlock() { unlocked = true; }

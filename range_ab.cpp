@@ -47,6 +47,5 @@ void Range_ab::upgrade()
     damage++;
 }
 
-int Range_ab::get_range() { return range; }
-
-int Range_ab::get_damage() { return damage; }
+bool Range_ab::is_unlocked() { return unlocked; }
+void Range_ab::unlock() { unlocked = true; }

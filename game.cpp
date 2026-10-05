@@ -9,7 +9,7 @@
 
 Game::Game(Map &map, Robot &player_robot)
     : map(map), player_robot(player_robot), turn(1), enemy_move_timer(0),
-      game_over(GAME_RUNNING)
+      game_over(GAME_RUNNING), level_up(0)
 {
     around = new Around_ab(1, 10, 20);
     range = new Range_ab(3, 20, 25);
@@ -100,11 +100,15 @@ void Game::update(Render &render)
         game_over = GAME_DEFEAT;
         return;
     }
-
+    if (level_up > 0)
+    {
+        return;
+    }
     if (turn == 1)
     {
         player_turn(render);
     }
+
     else
     {
         if (GetTime() - enemy_move_timer >= 0.05)
@@ -144,20 +148,24 @@ void Game::run(Render &render)
             if (turn == 1)
             {
                 if (IsKeyPressed(KEY_W))
-                    map.move_robot(&player_robot, player_robot.get_x(),
-                                   player_robot.get_y() - 1);
+                    level_up +=
+                        map.move_robot(&player_robot, player_robot.get_x(),
+                                       player_robot.get_y() - 1);
 
                 else if (IsKeyPressed(KEY_S))
-                    map.move_robot(&player_robot, player_robot.get_x(),
-                                   player_robot.get_y() + 1);
+                    level_up +=
+                        map.move_robot(&player_robot, player_robot.get_x(),
+                                       player_robot.get_y() + 1);
 
                 else if (IsKeyPressed(KEY_A))
-                    map.move_robot(&player_robot, player_robot.get_x() - 1,
-                                   player_robot.get_y());
+                    level_up +=
+                        map.move_robot(&player_robot, player_robot.get_x() - 1,
+                                       player_robot.get_y());
 
                 else if (IsKeyPressed(KEY_D))
-                    map.move_robot(&player_robot, player_robot.get_x() + 1,
-                                   player_robot.get_y());
+                    level_up +=
+                        map.move_robot(&player_robot, player_robot.get_x() + 1,
+                                       player_robot.get_y());
             }
 
             update(render);
@@ -167,8 +175,74 @@ void Game::run(Render &render)
                 game_over = GAME_VICTORY;
             }
         }
-        render.draw(map, player_robot, map.get_enemy_robots(), game_over);
+        std::vector<Ability *> abilities;
+        abilities.push_back(around);
+        abilities.push_back(range);
+        abilities.push_back(heal);
+        abilities.push_back(teleport);
+        render.draw(map, player_robot, map.get_enemy_robots(), game_over,
+                    level_up, abilities);
+        if (level_up > 0)
+        {
+            int level_choice = render.get_level_up_choice();
+            level_up_choice(level_choice);
+        }
     }
 
     CloseWindow();
+}
+
+void Game::level_up_choice(int choice)
+{
+    if (choice == 0)
+    {
+        return;
+    }
+
+    if (choice == 1)
+    {
+        if (around->is_unlocked())
+        {
+            around->upgrade();
+        }
+        else
+        {
+            around->unlock();
+        }
+    }
+    else if (choice == 2)
+    {
+        if (range->is_unlocked())
+        {
+            range->upgrade();
+        }
+        else
+        {
+            range->unlock();
+        }
+    }
+    else if (choice == 3)
+    {
+        if (heal->is_unlocked())
+        {
+            heal->upgrade();
+        }
+        else
+        {
+            heal->unlock();
+        }
+    }
+    else if (choice == 4)
+    {
+        if (teleport->is_unlocked())
+        {
+            teleport->upgrade();
+        }
+        else
+        {
+            teleport->unlock();
+        }
+    }
+
+    level_up--;
 }

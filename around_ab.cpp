@@ -4,7 +4,7 @@
 #include <cmath>
 
 Around_ab::Around_ab(int radius, int damage, int cost)
-    : radius(radius), damage(damage), cost(cost)
+    : radius(radius), damage(damage), cost(cost), unlocked(false)
 {
 }
 
@@ -34,7 +34,7 @@ void Around_ab::use(Robot &robot, Map &map, size_t x, size_t y)
 
 bool Around_ab::can_use(Robot &robot, Map &map, size_t x, size_t y)
 {
-    if (robot.get_mana() < cost || robot.get_hp() <= 0)
+    if (robot.get_mana() < cost || robot.get_hp() <= 0 || unlocked == false)
     {
         return false;
     }
@@ -49,6 +49,6 @@ void Around_ab::upgrade()
     radius++;
 }
 
-int Around_ab::get_radius() { return radius; }
+bool Around_ab::is_unlocked() { return unlocked; }
 
-int Around_ab::get_damage() { return damage; }
+void Around_ab::unlock() { unlocked = true; }

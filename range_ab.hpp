@@ -8,6 +8,7 @@ class Range_ab : public Ability
     int damage;
     int cost;
     int level;
+    bool unlocked;
 
   public:
     Range_ab(int radius, int damage, int cost);
@@ -17,6 +18,6 @@ class Range_ab : public Ability
     int get_cost() override;
     void upgrade() override;
 
-    int get_range();
-    int get_damage();
+    bool is_unlocked() override;
+    void unlock() override;
 };

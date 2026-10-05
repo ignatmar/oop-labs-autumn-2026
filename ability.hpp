@@ -10,4 +10,6 @@ class Ability
     virtual bool can_use(Robot &robot, Map &map, size_t x, size_t y) = 0;
     virtual int get_cost() = 0;
     virtual void upgrade() = 0;
+    virtual bool is_unlocked() = 0;
+    virtual void unlock() = 0;
 };

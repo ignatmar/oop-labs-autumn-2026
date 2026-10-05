@@ -18,7 +18,7 @@ class Map
   public:
     Map(size_t width, size_t height, std::vector<std::vector<char>> field,
         std::vector<Robot *> &enemy_robots, std::vector<Factory *> &factories);
-    void move_robot(Robot *robot, int new_x, int new_y);
+    int move_robot(Robot *robot, int new_x, int new_y);
     int get_width();
     int get_height();
     bool check_coords(size_t x, size_t y);

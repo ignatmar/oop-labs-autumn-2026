@@ -46,23 +46,26 @@ void Robot::set_max_mana(int new_max_mana)
     }
 }
 
-void Robot::set_exp(int new_exp)
+int Robot::add_exp(int delta_exp)
 {
-    while (new_exp >= exp_max)
+    exp += delta_exp;
+
+    int levels = 0;
+
+    while (exp >= exp_max)
     {
-        new_exp -= exp_max;
+        exp -= exp_max;
         lvl_up();
+        levels++;
     }
-    exp = new_exp;
+    if (team == 1)
+    {
+        return levels;
+    }
+    return 0;
 }
 
-void Robot::set_lvl(int new_lvl)
-{
-    while (lvl < new_lvl)
-    {
-        lvl_up();
-    }
-}
+int Robot::get_lvl() { return lvl; }
 
 void Robot::lvl_up()
 {
@@ -127,3 +130,5 @@ int Robot::get_vision() { return vision; }
 int Robot::get_mana() { return mana; }
 
 int Robot::get_max_mana() { return mana_max; }
+
+int Robot::get_max_exp() { return exp_max; };

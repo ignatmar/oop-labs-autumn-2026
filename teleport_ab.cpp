@@ -40,3 +40,7 @@ void Teleport_ab::upgrade()
     level++;
     damage++;
 }
+
+bool Teleport_ab::is_unlocked() { return unlocked; }
+
+void Teleport_ab::unlock() { unlocked = true; }

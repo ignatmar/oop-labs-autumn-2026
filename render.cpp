@@ -8,7 +8,8 @@
 Render::Render(int draw_scale) { this->draw_scale = draw_scale; }
 
 void Render::draw(Map &map, Robot &player,
-                  const std::vector<Robot *> enemy_robots, int game_over)
+                  const std::vector<Robot *> enemy_robots, int game_over,
+                  int level_up, std::vector<Ability *> abilities)
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
@@ -91,10 +92,14 @@ void Render::draw(Map &map, Robot &player,
     }
 
     draw_ap_text(map, player, enemy_robots);
-    draw_abilities(map);
+    draw_abilities(map, abilities);
     if (game_over)
     {
         draw_game_over(game_over);
+    }
+    if (level_up)
+    {
+        draw_level_up();
     }
     EndDrawing();
 }
@@ -117,7 +122,7 @@ void Render::start(Map &map)
     SetTargetFPS(60);
 }
 
-void Render::draw_abilities(Map &map)
+void Render::draw_abilities(Map &map, std::vector<Ability *> abilities)
 {
     int panel_y = map.get_height() * draw_scale;
     int panel_height = 120;
@@ -138,10 +143,14 @@ void Render::draw_abilities(Map &map)
         int x = start_x + i * (square_size + spacing);
 
         DrawRectangleLines(x, panel_y + 10, square_size, square_size, WHITE);
-        DrawTexturePro(
-            textures[i],
-            {0, 0, (float)textures[i].width, (float)textures[i].height},
-            {(float)x, (float)panel_y + 10, 70, 70}, {0, 0}, 0, WHITE);
+        if (abilities[i]->is_unlocked())
+        {
+            DrawTexturePro(
+                textures[i],
+                {0, 0, (float)textures[i].width, (float)textures[i].height},
+                {(float)x, (float)panel_y + 10, 70, 70}, {0, 0}, 0, WHITE);
+        }
+
         int text_width = MeasureText(names[i], 16);
         int text_x = x + (square_size - text_width) / 2;
 
@@ -160,7 +169,8 @@ void Render::draw_ap_text(Map &map, Robot &player,
 
     int name_y = 20;
 
-    DrawText("PLAYER", panel_x + 20, name_y, 20, WHITE);
+    std::string player_text = "PLAYER LVL " + std::to_string(player.get_lvl());
+    DrawText(player_text.c_str(), panel_x + 20, name_y, 20, WHITE);
 
     float hp_percent = (float)player.get_hp() / player.get_max_hp();
     float ap_percent = (float)player.get_ap() / player.get_max_ap();
@@ -257,3 +267,85 @@ void Render::draw_game_over(int game_over)
 }
 
 int Render::get_draw_scale() { return draw_scale; }
+
+void Render::draw_level_up()
+{
+    int width = 700;
+    int height = 700;
+
+    int start_x = (GetScreenWidth() - width) / 2;
+    int start_y = (GetScreenHeight() - height) / 2;
+
+    DrawRectangle(start_x, start_y, width, height, DARKGRAY);
+    DrawRectangleLines(start_x, start_y, width, height, WHITE);
+
+    DrawText("LEVEL UP!", start_x + 250, start_y + 30, 30, WHITE);
+
+    int square_size = 250;
+    int spacing = 30;
+
+    int x1 = start_x + 70;
+    int x2 = x1 + square_size + spacing;
+    int y1 = start_y + 100;
+    int y2 = y1 + square_size + spacing;
+
+    DrawRectangleLines(x1, y1, square_size, square_size, WHITE);
+    DrawRectangleLines(x2, y1, square_size, square_size, WHITE);
+    DrawRectangleLines(x1, y2, square_size, square_size, WHITE);
+    DrawRectangleLines(x2, y2, square_size, square_size, WHITE);
+
+    DrawText("Around", x1 + 80, y1 + 110, 25, WHITE);
+    DrawText("Range", x2 + 90, y1 + 110, 25, WHITE);
+    DrawText("Heal", x1 + 95, y2 + 110, 25, WHITE);
+    DrawText("Teleport", x2 + 70, y2 + 110, 25, WHITE);
+}
+
+int Render::get_level_up_choice()
+{
+    int width = 700;
+    int height = 500;
+
+    int start_x = (GetScreenWidth() - width) / 2;
+    int start_y = (GetScreenHeight() - height) / 2;
+
+    int square_size = 250;
+    int spacing = 30;
+
+    int x1 = start_x + 70;
+    int x2 = x1 + square_size + spacing;
+    int y1 = start_y + 100;
+    int y2 = y1 + square_size + spacing;
+
+    if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        return 0;
+    }
+
+    Vector2 mouse = GetMousePosition();
+
+    if (mouse.x >= x1 && mouse.x <= x1 + square_size && mouse.y >= y1 &&
+        mouse.y <= y1 + square_size)
+    {
+        return 1;
+    }
+
+    if (mouse.x >= x2 && mouse.x <= x2 + square_size && mouse.y >= y1 &&
+        mouse.y <= y1 + square_size)
+    {
+        return 2;
+    }
+
+    if (mouse.x >= x1 && mouse.x <= x1 + square_size && mouse.y >= y2 &&
+        mouse.y <= y2 + square_size)
+    {
+        return 3;
+    }
+
+    if (mouse.x >= x2 && mouse.x <= x2 + square_size && mouse.y >= y2 &&
+        mouse.y <= y2 + square_size)
+    {
+        return 4;
+    }
+
+    return 0;
+}

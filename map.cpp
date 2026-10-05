@@ -43,7 +43,7 @@ Map::Map(size_t width, size_t height, std::vector<std::vector<char>> field,
     }
 }
 
-void Map::move_robot(Robot *robot, int new_x, int new_y)
+int Map::move_robot(Robot *robot, int new_x, int new_y)
 {
     if (check_coords(new_x, new_y))
     {
@@ -58,6 +58,10 @@ void Map::move_robot(Robot *robot, int new_x, int new_y)
                 {
                     field[new_y][new_x].set_robot(nullptr);
                     robot->add_kill();
+                    int levels = robot->add_exp(robot->get_max_exp());
+                    TraceLog(LOG_INFO, "LEVELS: %d", levels);
+                    robot->set_ap(robot->get_ap() - 3);
+                    return levels;
                 }
                 robot->set_ap(robot->get_ap() - 3);
             }
@@ -70,6 +74,7 @@ void Map::move_robot(Robot *robot, int new_x, int new_y)
             }
         }
     }
+    return 0;
 }
 
 int Map::get_width() { return width; }

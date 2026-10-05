@@ -8,6 +8,7 @@ class Around_ab : public Ability
     int damage;
     int cost;
     int level;
+    bool unlocked;
 
   public:
     Around_ab(int radius, int damage, int cost);
@@ -17,6 +18,6 @@ class Around_ab : public Ability
     int get_cost() override;
     void upgrade() override;
 
-    int get_radius();
-    int get_damage();
+    bool is_unlocked() override;
+    void unlock() override;
 };

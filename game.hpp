@@ -19,10 +19,14 @@ class Game
     int turn;
     double enemy_move_timer;
     GAME_STATUS game_over;
+    int level_choice;
+
     Ability *around;
     Ability *range;
     Ability *heal;
     Ability *teleport;
+
+    int level_up;
 
   public:
     Game(Map &map, Robot &player_robot);
@@ -33,4 +37,5 @@ class Game
     void end_turn();
     void update(Render &render);
     void kill_enemy(Robot *enemy);
+    void level_up_choice(int choice);
 };

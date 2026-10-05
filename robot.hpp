@@ -30,8 +30,9 @@ class Robot
     void set_dmg(int new_dmg);
     void set_mana(int new_mana);
     void set_max_mana(int new_max_mana);
-    void set_exp(int new_exp);
-    void set_lvl(int new_lvl);
+    int add_exp(int delta_exp);
+    int get_max_exp();
+    int get_lvl();
     void lvl_up();
     void upd_hp(int delta_hp);
     void interact(Robot &other);
