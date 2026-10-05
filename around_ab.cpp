@@ -1,0 +1,54 @@
+#include "around_ab.hpp"
+#include "map.hpp"
+#include "robot.hpp"
+#include <cmath>
+
+Around_ab::Around_ab(int radius, int damage, int cost)
+    : radius(radius), damage(damage), cost(cost)
+{
+}
+
+void Around_ab::use(Robot &robot, Map &map, size_t x, size_t y)
+{
+    if (!can_use(robot, map, 0, 0))
+    {
+        return;
+    }
+    int xx = robot.get_x();
+    int yy = robot.get_y();
+    const std::vector<Robot *> &enemy_robots = map.get_enemy_robots();
+    for (Robot *r : enemy_robots)
+    {
+        if (r == nullptr)
+        {
+            continue;
+        }
+        if (std::pow(r->get_x() - xx, 2) + std::pow(r->get_y() - yy, 2) <=
+            pow(radius, 2))
+        {
+            r->upd_hp(-damage);
+        }
+    }
+    robot.set_mana(robot.get_mana() - cost);
+}
+
+bool Around_ab::can_use(Robot &robot, Map &map, size_t x, size_t y)
+{
+    if (robot.get_mana() < cost || robot.get_hp() <= 0)
+    {
+        return false;
+    }
+    return true;
+}
+
+int Around_ab::get_cost() { return cost; }
+
+void Around_ab::upgrade()
+{
+    level++;
+    radius++;
+}
+
+int Around_ab::get_radius() { return radius; }
+
+int Around_ab::get_damage() { return damage; }

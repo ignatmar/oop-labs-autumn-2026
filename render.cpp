@@ -2,6 +2,7 @@
 #include "cell.hpp"
 #include "robot.hpp"
 #include <cstdlib>
+#include <raylib.h>
 #include <string>
 
 Render::Render(int draw_scale) { this->draw_scale = draw_scale; }
@@ -59,22 +60,38 @@ void Render::draw(Map &map, Robot &player,
             {
                 if (cell.get_robot()->get_team() == 1)
                 {
-                    DrawCircle(x * draw_scale + draw_scale / 2,
-                               y * draw_scale + draw_scale / 2,
-                               draw_scale / 3.0, BLUE);
+                    // DrawCircle(x * draw_scale + draw_scale / 2,
+                    //           y * draw_scale + draw_scale / 2,
+                    //           draw_scale / 3.0, BLUE);
+
+                    DrawTexturePro(player_texture,
+                                   {0, 0, (float)player_texture.width,
+                                    (float)player_texture.height},
+                                   {(float)(x * draw_scale),
+                                    (float)(y * draw_scale), (float)draw_scale,
+                                    (float)draw_scale},
+                                   {0, 0}, 0, WHITE);
                 }
                 else if (std::abs(x - p_x) + std::abs(y - p_y) < rad ||
                          cell.if_visible())
                 {
-                    DrawCircle(x * draw_scale + draw_scale / 2,
-                               y * draw_scale + draw_scale / 2,
-                               draw_scale / 3.0, RED);
+                    // DrawCircle(x * draw_scale + draw_scale / 2,
+                    //          y * draw_scale + draw_scale / 2,
+                    //           draw_scale / 3.0, RED);
+                    DrawTexturePro(enemy_texture,
+                                   {0, 0, (float)player_texture.width,
+                                    (float)player_texture.height},
+                                   {(float)(x * draw_scale),
+                                    (float)(y * draw_scale), (float)draw_scale,
+                                    (float)draw_scale},
+                                   {0, 0}, 0, WHITE);
                 }
             }
         }
     }
 
     draw_ap_text(map, player, enemy_robots);
+    draw_abilities(map);
     if (game_over)
     {
         draw_game_over(game_over);
@@ -85,9 +102,51 @@ void Render::draw(Map &map, Robot &player,
 void Render::start(Map &map)
 {
     InitWindow(map.get_width() * draw_scale + 200,
-               map.get_height() * draw_scale, "Game");
+               map.get_height() * draw_scale + 120, "Game");
+
+    around_texture = LoadTexture("assets/ab/around.png");
+    range_texture = LoadTexture("assets/ab/range.png");
+    heal_texture = LoadTexture("assets/ab/heal.png");
+    teleport_texture = LoadTexture("assets/ab/teleport.png");
+
+    player_texture = LoadTexture("assets/robots/player.png");
+    enemy_texture = LoadTexture("assets/robots/enemy.png");
+
+    grass_texture = LoadTexture("assets/bg/grass.png");
 
     SetTargetFPS(60);
+}
+
+void Render::draw_abilities(Map &map)
+{
+    int panel_y = map.get_height() * draw_scale;
+    int panel_height = 120;
+
+    int square_size = 70;
+    int spacing = 35;
+
+    DrawRectangle(0, panel_y, GetScreenWidth(), panel_height, BLACK);
+
+    int total_width = square_size * 4 + spacing * 3;
+    int start_x = (GetScreenWidth() - total_width) / 2;
+
+    const char *names[] = {"Around hit", "Range hit", "Heal", "Teleport"};
+    Texture2D textures[] = {around_texture, range_texture, heal_texture,
+                            teleport_texture};
+    for (int i = 0; i < 4; i++)
+    {
+        int x = start_x + i * (square_size + spacing);
+
+        DrawRectangleLines(x, panel_y + 10, square_size, square_size, WHITE);
+        DrawTexturePro(
+            textures[i],
+            {0, 0, (float)textures[i].width, (float)textures[i].height},
+            {(float)x, (float)panel_y + 10, 70, 70}, {0, 0}, 0, WHITE);
+        int text_width = MeasureText(names[i], 16);
+        int text_x = x + (square_size - text_width) / 2;
+
+        DrawText(names[i], text_x, panel_y + 90, 16, WHITE);
+    }
 }
 
 void Render::draw_ap_text(Map &map, Robot &player,
@@ -105,6 +164,7 @@ void Render::draw_ap_text(Map &map, Robot &player,
 
     float hp_percent = (float)player.get_hp() / player.get_max_hp();
     float ap_percent = (float)player.get_ap() / player.get_max_ap();
+    float mana_percent = (float)player.get_mana() / player.get_max_mana();
 
     std::string player_ap = "AP: " + std::to_string(player.get_ap()) + "/" +
                             std::to_string(player.get_max_ap());
@@ -112,7 +172,7 @@ void Render::draw_ap_text(Map &map, Robot &player,
     DrawText(player_ap.c_str(), panel_x + 20, name_y + 30, 20, WHITE);
 
     DrawRectangle(panel_x + 20, name_y + 55, 160, 15, DARKGRAY);
-    DrawRectangle(panel_x + 20, name_y + 55, 160 * ap_percent, 15, BLUE);
+    DrawRectangle(panel_x + 20, name_y + 55, 160 * ap_percent, 15, YELLOW);
 
     std::string player_hp = "HP: " + std::to_string(player.get_hp()) + "/" +
                             std::to_string(player.get_max_hp());
@@ -122,37 +182,60 @@ void Render::draw_ap_text(Map &map, Robot &player,
     DrawRectangle(panel_x + 20, name_y + 105, 160, 15, DARKGRAY);
     DrawRectangle(panel_x + 20, name_y + 105, 160 * hp_percent, 15, RED);
 
-    int y = 200;
+    std::string player_mana = "MANA: " + std::to_string(player.get_mana()) +
+                              "/" + std::to_string(player.get_max_mana());
+
+    DrawText(player_mana.c_str(), panel_x + 20, name_y + 130, 20, WHITE);
+
+    DrawRectangle(panel_x + 20, name_y + 155, 160, 15, DARKGRAY);
+    DrawRectangle(panel_x + 20, name_y + 155, 160 * mana_percent, 15, BLUE);
+
+    int y = 240;
 
     for (size_t i = 0; i < enemy_robots.size(); i++)
     {
-        std::string name = "ENEMY " + std::to_string(i + 1);
+        if (enemy_robots[i]->get_hp() > 0)
+        {
+            std::string name = "ENEMY " + std::to_string(i + 1);
 
-        float hp_percent =
-            (float)enemy_robots[i]->get_hp() / enemy_robots[i]->get_max_hp();
+            float hp_percent = (float)enemy_robots[i]->get_hp() /
+                               enemy_robots[i]->get_max_hp();
 
-        float ap_percent =
-            (float)enemy_robots[i]->get_ap() / enemy_robots[i]->get_max_ap();
+            float ap_percent = (float)enemy_robots[i]->get_ap() /
+                               enemy_robots[i]->get_max_ap();
+            float mana_percent = (float)enemy_robots[i]->get_mana() /
+                                 enemy_robots[i]->get_max_mana();
 
-        DrawText(name.c_str(), panel_x + 20, y, 20, WHITE);
+            DrawText(name.c_str(), panel_x + 20, y, 20, WHITE);
 
-        std::string ap = "AP: " + std::to_string(enemy_robots[i]->get_ap()) +
-                         "/" + std::to_string(enemy_robots[i]->get_max_ap());
+            std::string ap =
+                "AP: " + std::to_string(enemy_robots[i]->get_ap()) + "/" +
+                std::to_string(enemy_robots[i]->get_max_ap());
 
-        DrawText(ap.c_str(), panel_x + 20, y + 30, 20, WHITE);
+            DrawText(ap.c_str(), panel_x + 20, y + 30, 20, WHITE);
 
-        DrawRectangle(panel_x + 20, y + 55, 160, 15, DARKGRAY);
-        DrawRectangle(panel_x + 20, y + 55, 160 * ap_percent, 15, BLUE);
+            DrawRectangle(panel_x + 20, y + 55, 160, 15, DARKGRAY);
+            DrawRectangle(panel_x + 20, y + 55, 160 * ap_percent, 15, YELLOW);
 
-        std::string hp = "HP: " + std::to_string(enemy_robots[i]->get_hp()) +
-                         "/" + std::to_string(enemy_robots[i]->get_max_hp());
+            std::string hp =
+                "HP: " + std::to_string(enemy_robots[i]->get_hp()) + "/" +
+                std::to_string(enemy_robots[i]->get_max_hp());
 
-        DrawText(hp.c_str(), panel_x + 20, y + 80, 20, WHITE);
+            DrawText(hp.c_str(), panel_x + 20, y + 80, 20, WHITE);
 
-        DrawRectangle(panel_x + 20, y + 105, 160, 15, DARKGRAY);
-        DrawRectangle(panel_x + 20, y + 105, 160 * hp_percent, 15, RED);
+            DrawRectangle(panel_x + 20, y + 105, 160, 15, DARKGRAY);
+            DrawRectangle(panel_x + 20, y + 105, 160 * hp_percent, 15, RED);
 
-        y += 150;
+            std::string mana = "MANA: " + std::to_string(player.get_mana()) +
+                               "/" + std::to_string(player.get_max_mana());
+
+            DrawText(mana.c_str(), panel_x + 20, y + 130, 20, WHITE);
+
+            DrawRectangle(panel_x + 20, y + 155, 160, 15, DARKGRAY);
+            DrawRectangle(panel_x + 20, y + 155, 160 * mana_percent, 15, BLUE);
+
+            y += 200;
+        }
     }
 }
 

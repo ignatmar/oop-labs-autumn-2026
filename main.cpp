@@ -11,7 +11,7 @@ int main()
                                               {'.', '.', '.', '.', '.'},
                                               {'M', '.', '.', '.', '.'}};
 
-    Robot player(110, 40, 50, 7, 100, 1, 8, true);
+    Robot player(300, 30, 50, 7, 100, 1, 8, true);
 
     Robot enemy_1(80, 10, 50, 6, 100, 2, 1, false);
     Robot enemy_2(80, 10, 50, 6, 100, 2, 1, false);

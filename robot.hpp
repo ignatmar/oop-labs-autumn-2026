@@ -48,4 +48,6 @@ class Robot
     size_t get_kills();
     void add_kill();
     int get_vision();
+    int get_mana();
+    int get_max_mana();
 };

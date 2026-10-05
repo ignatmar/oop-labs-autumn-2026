@@ -123,3 +123,7 @@ size_t Robot::get_kills() { return kills; }
 void Robot::add_kill() { kills++; }
 
 int Robot::get_vision() { return vision; }
+
+int Robot::get_mana() { return mana; }
+
+int Robot::get_max_mana() { return mana_max; }

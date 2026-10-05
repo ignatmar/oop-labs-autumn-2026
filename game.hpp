@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ability.hpp"
 #include "map.hpp"
 #include "render.hpp"
 #include "robot.hpp"
@@ -18,6 +19,7 @@ class Game
     int turn;
     double enemy_move_timer;
     GAME_STATUS game_over;
+    Ability *around;
 
   public:
     Game(Map &map, Robot &player_robot);

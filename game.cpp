@@ -1,14 +1,21 @@
 #include "game.hpp"
+#include "ability.hpp"
+#include "around_ab.hpp"
 #include "factory.hpp"
-
 Game::Game(Map &map, Robot &player_robot)
     : map(map), player_robot(player_robot), turn(1), enemy_move_timer(0),
       game_over(GAME_RUNNING)
 {
+    around = new Around_ab(1, 10, 20);
 }
 
 void Game::player_turn()
 {
+    if (IsKeyPressed(KEY_ONE))
+    {
+        around->use(player_robot, map, 0, 0);
+    }
+
     if (player_robot.get_ap() <= 0)
     {
         end_turn();

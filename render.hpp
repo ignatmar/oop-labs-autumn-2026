@@ -8,6 +8,16 @@ class Render
   private:
     int draw_scale;
 
+    Texture2D around_texture;
+    Texture2D range_texture;
+    Texture2D heal_texture;
+    Texture2D teleport_texture;
+
+    Texture2D player_texture;
+    Texture2D enemy_texture;
+
+    Texture2D grass_texture;
+
   public:
     Render(int draw_scale);
 
@@ -17,4 +27,6 @@ class Render
     void draw_ap_text(Map &map, Robot &player,
                       const std::vector<Robot *> enemy_robots);
     void draw_game_over(int game_over);
+
+    void draw_abilities(Map &map);
 };
