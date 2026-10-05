@@ -4,6 +4,7 @@
 #include "factory.hpp"
 #include "heal_ab.hpp"
 #include "range_ab.hpp"
+#include "teleport_ab.hpp"
 #include <raylib.h>
 
 Game::Game(Map &map, Robot &player_robot)
@@ -13,6 +14,7 @@ Game::Game(Map &map, Robot &player_robot)
     around = new Around_ab(1, 10, 20);
     range = new Range_ab(3, 20, 25);
     heal = new Heal_ab(0, 15, 20);
+    teleport = new Teleport_ab(5, 0, 25);
 }
 
 void Game::player_turn(Render &render)
@@ -37,6 +39,16 @@ void Game::player_turn(Render &render)
         heal->use(player_robot, map, 0, 0);
     }
 
+    if (IsKeyPressed(KEY_FOUR))
+    {
+        Vector2 mouse = GetMousePosition();
+
+        int x = mouse.x / render.get_draw_scale();
+        int y = mouse.y / render.get_draw_scale();
+
+        teleport->use(player_robot, map, x, y);
+    }
+
     if (player_robot.get_ap() <= 0)
     {
         end_turn();
@@ -54,15 +66,15 @@ void Game::enemy_turn(Robot *enemy)
     {
         map.move_robot(enemy, e_x + 1, e_y);
     }
-    else if (e_x > p_x)
+    if (e_x > p_x)
     {
         map.move_robot(enemy, e_x - 1, e_y);
     }
-    else if (e_y < p_y)
+    if (e_y < p_y)
     {
         map.move_robot(enemy, e_x, e_y + 1);
     }
-    else if (e_y > p_y)
+    if (e_y > p_y)
     {
         map.move_robot(enemy, e_x, e_y - 1);
     }

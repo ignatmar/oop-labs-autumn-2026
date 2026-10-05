@@ -22,6 +22,7 @@ class Game
     Ability *around;
     Ability *range;
     Ability *heal;
+    Ability *teleport;
 
   public:
     Game(Map &map, Robot &player_robot);

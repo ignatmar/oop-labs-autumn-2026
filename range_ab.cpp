@@ -30,8 +30,8 @@ bool Range_ab::can_use(Robot &robot, Map &map, size_t x, size_t y)
     {
         return false;
     }
-    if (std::pow(enemy->get_x() - robot.get_x(), 2) +
-            std::pow(enemy->get_y() - robot.get_y(), 2) >
+    if (std::pow((int)enemy->get_x() - (int)robot.get_x(), 2) +
+            std::pow((int)enemy->get_y() - (int)robot.get_y(), 2) >
         std::pow(range, 2))
     {
         return false;
