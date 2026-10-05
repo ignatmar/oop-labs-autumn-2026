@@ -48,5 +48,4 @@ class Robot
     size_t get_kills();
     void add_kill();
     int get_vision();
-    bool if_visible();
 };

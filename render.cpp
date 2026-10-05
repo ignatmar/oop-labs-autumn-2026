@@ -6,8 +6,8 @@
 
 Render::Render(int draw_scale) { this->draw_scale = draw_scale; }
 
-void Render::draw(Map &map, Robot &player, std::vector<Robot *> enemy_robots,
-                  int game_over)
+void Render::draw(Map &map, Robot &player,
+                  const std::vector<Robot *> enemy_robots, int game_over)
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);

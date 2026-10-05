@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <vector>
 
-int Map::check_coords(size_t x, size_t y) { return (y < height && x < width); }
+bool Map::check_coords(size_t x, size_t y) { return (y < height && x < width); }
 
 Map::Map(size_t width, size_t height, std::vector<std::vector<char>> field,
          std::vector<Robot *> &enemy_robots, std::vector<Factory *> &factories)

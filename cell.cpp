@@ -18,7 +18,7 @@ Cell::Cell(char sym) : robot(nullptr), visible(false)
     }
 }
 
-int Cell::can_walk() { return surface >= 0; }
+bool Cell::can_walk() { return surface >= 0; }
 
 int Cell::get_surface() { return surface; }
 
@@ -26,7 +26,7 @@ Robot *Cell::get_robot() { return robot; }
 
 void Cell::set_robot(Robot *robot) { this->robot = robot; }
 
-int Cell::if_visible() { return visible; }
+bool Cell::if_visible() { return visible; }
 
 void Cell::make_visible() { visible = true; }
 

@@ -21,7 +21,7 @@ class Map
     void move_robot(Robot *robot, int new_x, int new_y);
     int get_width();
     int get_height();
-    int check_coords(size_t x, size_t y);
+    bool check_coords(size_t x, size_t y);
     Cell &get_cell(int x, int y);
     const std::vector<Robot *> &get_enemy_robots();
     void set_factory(size_t x, size_t y);
