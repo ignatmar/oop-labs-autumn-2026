@@ -1,5 +1,6 @@
 #include "robot.hpp"
-
+#include "dmg_boost.hpp"
+#include "shield.hpp"
 int Robot::normalize(int x, int min_x, int max_x)
 {
     if (x < min_x)
@@ -76,7 +77,44 @@ void Robot::lvl_up()
     exp_max += 80;
 }
 
-void Robot::upd_hp(int delta_hp) { set_hp(hp + delta_hp); }
+void Robot::upd_hp(int delta_hp)
+{
+    if (delta_hp >= 0)
+    {
+        set_hp(hp + delta_hp);
+        return;
+    }
+
+    int damage = -delta_hp;
+
+    for (auto it = statuses.begin(); it != statuses.end(); ++it)
+    {
+        if ((*it)->get_type() == SHIELD)
+        {
+            Shield *shield = (Shield *)*it;
+
+            if (shield->get_damage() >= damage)
+            {
+                shield->set_damage(shield->get_damage() - damage);
+
+                if (!shield->is_active())
+                {
+                    delete *it;
+                    statuses.erase(it);
+                }
+
+                return;
+            }
+
+            damage -= shield->get_damage();
+            delete *it;
+            statuses.erase(it);
+            break;
+        }
+    }
+
+    set_hp(hp - damage);
+}
 
 void Robot::interact(Robot &other)
 {
@@ -132,3 +170,78 @@ int Robot::get_mana() { return mana; }
 int Robot::get_max_mana() { return mana_max; }
 
 int Robot::get_max_exp() { return exp_max; };
+
+void Robot::add_status(Status *status)
+{
+    for (Status *current : statuses)
+    {
+        if (current->get_type() == status->get_type())
+        {
+            current->combine(status);
+            delete status;
+            return;
+        }
+    }
+
+    statuses.push_back(status);
+}
+
+void Robot::update_statuses()
+{
+    for (auto it = statuses.begin(); it != statuses.end();)
+    {
+        (*it)->update(*this);
+
+        if (!(*it)->is_active())
+        {
+            delete *it;
+            it = statuses.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
+bool Robot::can_move()
+{
+    for (Status *status : statuses)
+    {
+        if (status->get_type() == SLOW)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Robot::can_use_ability()
+{
+    for (auto it = statuses.begin(); it != statuses.end(); ++it)
+    {
+        if ((*it)->get_type() == OVERDRIVE)
+        {
+            delete *it;
+            statuses.erase(it);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+int Robot::get_shield()
+{
+    for (Status *status : statuses)
+    {
+        if (status->get_type() == SHIELD)
+        {
+            Shield *shield = (Shield *)status;
+            return shield->get_damage();
+        }
+    }
+
+    return 0;
+}

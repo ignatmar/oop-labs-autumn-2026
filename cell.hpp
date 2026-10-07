@@ -1,6 +1,6 @@
 #pragma once
-
 #include <raylib.h>
+
 class Robot;
 class Factory;
 
@@ -12,12 +12,21 @@ enum SURFACE
     SAND = 2
 };
 
+enum ItemType
+{
+    HEALTH,
+    MANA,
+    DAMAGE
+};
+
 class Cell
 {
   private:
     Robot *robot;
     int surface;
     bool visible;
+    bool has_item;
+    ItemType item;
 
   public:
     Cell(char sym);
@@ -28,4 +37,9 @@ class Cell
     bool if_visible();
     void make_visible();
     void set_surface(int value);
+
+    bool if_has_item();
+    ItemType get_item();
+    void set_item(ItemType item);
+    void remove_item();
 };

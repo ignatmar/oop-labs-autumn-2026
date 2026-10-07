@@ -1,6 +1,7 @@
 #include "heal_ab.hpp"
 #include "map.hpp"
 #include "robot.hpp"
+#include "shield.hpp"
 
 Heal_ab::Heal_ab(int range, int delta_hp, int cost)
     : range(range), delta_hp(delta_hp), cost(cost)
@@ -13,7 +14,14 @@ void Heal_ab::use(Robot &robot, Map &map, size_t x, size_t y)
     {
         return;
     }
+    int extra = robot.get_hp() + delta_hp - robot.get_max_hp();
+
     robot.upd_hp(delta_hp);
+
+    if (extra > 0)
+    {
+        robot.add_status(new Shield(extra));
+    }
     robot.set_mana(robot.get_mana() - cost);
 }
 

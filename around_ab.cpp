@@ -1,5 +1,6 @@
 #include "around_ab.hpp"
 #include "map.hpp"
+#include "overdrive.hpp"
 #include "robot.hpp"
 #include <cmath>
 
@@ -17,16 +18,18 @@ void Around_ab::use(Robot &robot, Map &map, size_t x, size_t y)
     int xx = robot.get_x();
     int yy = robot.get_y();
     const std::vector<Robot *> &enemy_robots = map.get_enemy_robots();
-    for (Robot *r : enemy_robots)
+    for (Robot *enemy : enemy_robots)
     {
-        if (r == nullptr)
+        if (enemy == nullptr)
         {
             continue;
         }
-        if (std::pow(r->get_x() - xx, 2) + std::pow(r->get_y() - yy, 2) <=
+        if (std::pow(enemy->get_x() - xx, 2) +
+                std::pow(enemy->get_y() - yy, 2) <=
             pow(radius, 2))
         {
-            r->upd_hp(-damage);
+            enemy->upd_hp(-damage);
+            enemy->add_status(new Overdrive());
         }
     }
     robot.set_mana(robot.get_mana() - cost);

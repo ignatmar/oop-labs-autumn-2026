@@ -31,4 +31,6 @@ class Map
     void add_step();
     const std::vector<Factory *> &get_factories();
     void update_vision(int vision, size_t x, size_t y);
+
+    bool take_item(int x, int y, ItemType &item);
 };

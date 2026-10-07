@@ -38,7 +38,7 @@ int Teleport_ab::get_cost() { return cost; }
 void Teleport_ab::upgrade()
 {
     level++;
-    damage++;
+    cost--;
 }
 
 bool Teleport_ab::is_unlocked() { return unlocked; }

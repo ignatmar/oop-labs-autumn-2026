@@ -173,6 +173,7 @@ void Render::draw_ap_text(Map &map, Robot &player,
     DrawText(player_text.c_str(), panel_x + 20, name_y, 20, WHITE);
 
     float hp_percent = (float)player.get_hp() / player.get_max_hp();
+    float shield_percent = (float)player.get_shield() / player.get_max_hp();
     float ap_percent = (float)player.get_ap() / player.get_max_ap();
     float mana_percent = (float)player.get_mana() / player.get_max_mana();
 
@@ -200,7 +201,15 @@ void Render::draw_ap_text(Map &map, Robot &player,
     DrawRectangle(panel_x + 20, name_y + 155, 160, 15, DARKGRAY);
     DrawRectangle(panel_x + 20, name_y + 155, 160 * mana_percent, 15, BLUE);
 
-    int y = 240;
+    std::string player_shield =
+        "SHIELD: " + std::to_string(player.get_shield());
+
+    DrawText(player_shield.c_str(), panel_x + 20, name_y + 180, 20, WHITE);
+
+    DrawRectangle(panel_x + 20, name_y + 205, 160, 15, DARKGRAY);
+    DrawRectangle(panel_x + 20, name_y + 205, 160, 15, WHITE);
+
+    int y = 290;
 
     for (size_t i = 0; i < enemy_robots.size(); i++)
     {

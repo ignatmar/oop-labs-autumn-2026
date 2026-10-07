@@ -19,12 +19,12 @@ Game::Game(Map &map, Robot &player_robot)
 
 void Game::player_turn(Render &render)
 {
-    if (IsKeyPressed(KEY_ONE))
+    if (IsKeyPressed(KEY_ONE) && player_robot.can_use_ability())
     {
         around->use(player_robot, map, 0, 0);
     }
 
-    if (IsKeyPressed(KEY_TWO))
+    if (IsKeyPressed(KEY_TWO) && player_robot.can_use_ability())
     {
         Vector2 mouse = GetMousePosition();
 
@@ -34,12 +34,12 @@ void Game::player_turn(Render &render)
         range->use(player_robot, map, x, y);
     }
 
-    if (IsKeyPressed(KEY_THREE))
+    if (IsKeyPressed(KEY_THREE) && player_robot.can_use_ability())
     {
         heal->use(player_robot, map, 0, 0);
     }
 
-    if (IsKeyPressed(KEY_FOUR))
+    if (IsKeyPressed(KEY_FOUR) && player_robot.can_use_ability())
     {
         Vector2 mouse = GetMousePosition();
 
@@ -48,6 +48,8 @@ void Game::player_turn(Render &render)
 
         teleport->use(player_robot, map, x, y);
     }
+
+    player_robot.update_statuses();
 
     if (player_robot.get_ap() <= 0)
     {
@@ -78,6 +80,8 @@ void Game::enemy_turn(Robot *enemy)
     {
         map.move_robot(enemy, e_x, e_y - 1);
     }
+
+    enemy->update_statuses();
 }
 
 void Game::end_turn()

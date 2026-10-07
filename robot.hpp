@@ -1,5 +1,8 @@
 #pragma once
+#include "cell.hpp"
+#include "status.hpp"
 #include <cstdlib>
+#include <vector>
 
 class Robot
 {
@@ -21,6 +24,12 @@ class Robot
     int vision;
     bool visible;
     int normalize(int x, int min_x, int max_x);
+
+    std::vector<Status *> statuses;
+
+    int health_items;
+    int mana_items;
+    int damage_items;
 
   public:
     Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max, int team,
@@ -51,4 +60,16 @@ class Robot
     int get_vision();
     int get_mana();
     int get_max_mana();
+
+    void add_status(Status *status);
+    void update_statuses();
+    bool can_move();
+    bool can_use_ability();
+    int get_shield();
+
+    int get_dmg();
+
+    void add_item(ItemType type);
+
+    bool use_item(ItemType type);
 };

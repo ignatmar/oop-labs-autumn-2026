@@ -1,4 +1,5 @@
 #include "range_ab.hpp"
+#include "burning.hpp"
 #include "map.hpp"
 #include "robot.hpp"
 #include <cmath>
@@ -16,6 +17,7 @@ void Range_ab::use(Robot &robot, Map &map, size_t x, size_t y)
     }
     Robot *enemy = map.get_cell(x, y).get_robot();
     enemy->upd_hp(-damage);
+    enemy->add_status(new Burning(2, 5));
     robot.set_mana(robot.get_mana() - cost);
 }
 

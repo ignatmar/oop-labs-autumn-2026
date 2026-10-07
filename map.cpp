@@ -45,6 +45,11 @@ Map::Map(size_t width, size_t height, std::vector<std::vector<char>> field,
 
 int Map::move_robot(Robot *robot, int new_x, int new_y)
 {
+    if (!robot->can_move())
+    {
+        return 0;
+    }
+
     if (check_coords(new_x, new_y))
     {
         Cell &new_cell = field[new_y][new_x];
@@ -121,4 +126,19 @@ void Map::update_vision(int vision, size_t x, size_t y)
             }
         }
     }
+}
+
+bool Map::take_item(int x, int y, ItemType &item)
+{
+    Cell &cell = field[y][x];
+
+    if (!cell.if_has_item())
+    {
+        return false;
+    }
+
+    item = cell.get_item();
+    cell.remove_item();
+
+    return true;
 }
