@@ -3,7 +3,7 @@
 
 Burning::Burning(int turns, int damage) : turns(turns), damage(damage) {}
 
-void Burning::apply(Robot &robot) {}
+void Burning::apply(Robot &) {}
 
 void Burning::update(Robot &robot)
 {

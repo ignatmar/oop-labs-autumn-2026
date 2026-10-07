@@ -3,9 +3,9 @@
 
 Shield::Shield(int damage) : turns(0), damage(damage) {}
 
-void Shield::apply(Robot &robot) {}
+void Shield::apply(Robot &) {}
 
-void Shield::update(Robot &robot) {}
+void Shield::update(Robot &) {}
 
 bool Shield::is_active() { return damage > 0; }
 

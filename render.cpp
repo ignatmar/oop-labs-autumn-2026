@@ -92,7 +92,10 @@ void Render::draw(Map &map, Robot &player,
     }
 
     draw_ap_text(map, player, enemy_robots);
-    draw_abilities(map, abilities);
+    if (!game_over)
+    {
+        draw_abilities(map, abilities);
+    }
     if (game_over)
     {
         draw_game_over(game_over);
@@ -173,7 +176,6 @@ void Render::draw_ap_text(Map &map, Robot &player,
     DrawText(player_text.c_str(), panel_x + 20, name_y, 20, WHITE);
 
     float hp_percent = (float)player.get_hp() / player.get_max_hp();
-    float shield_percent = (float)player.get_shield() / player.get_max_hp();
     float ap_percent = (float)player.get_ap() / player.get_max_ap();
     float mana_percent = (float)player.get_mana() / player.get_max_mana();
 
@@ -245,8 +247,9 @@ void Render::draw_ap_text(Map &map, Robot &player,
             DrawRectangle(panel_x + 20, y + 105, 160, 15, DARKGRAY);
             DrawRectangle(panel_x + 20, y + 105, 160 * hp_percent, 15, RED);
 
-            std::string mana = "MANA: " + std::to_string(player.get_mana()) +
-                               "/" + std::to_string(player.get_max_mana());
+            std::string mana =
+                "MANA: " + std::to_string(enemy_robots[i]->get_mana()) + "/" +
+                std::to_string(enemy_robots[i]->get_max_mana());
 
             DrawText(mana.c_str(), panel_x + 20, y + 130, 20, WHITE);
 

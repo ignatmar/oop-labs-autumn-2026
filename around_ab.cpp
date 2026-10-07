@@ -9,7 +9,7 @@ Around_ab::Around_ab(int radius, int damage, int cost)
 {
 }
 
-void Around_ab::use(Robot &robot, Map &map, size_t x, size_t y)
+void Around_ab::use(Robot &robot, Map &map, size_t, size_t)
 {
     if (!can_use(robot, map, 0, 0))
     {
@@ -35,7 +35,7 @@ void Around_ab::use(Robot &robot, Map &map, size_t x, size_t y)
     robot.set_mana(robot.get_mana() - cost);
 }
 
-bool Around_ab::can_use(Robot &robot, Map &map, size_t x, size_t y)
+bool Around_ab::can_use(Robot &robot, Map &, size_t, size_t)
 {
     if (robot.get_mana() < cost || robot.get_hp() <= 0 || unlocked == false)
     {

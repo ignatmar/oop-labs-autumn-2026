@@ -23,7 +23,7 @@ void Range_ab::use(Robot &robot, Map &map, size_t x, size_t y)
 
 bool Range_ab::can_use(Robot &robot, Map &map, size_t x, size_t y)
 {
-    if (robot.get_mana() < cost || robot.get_hp() <= 0)
+    if (robot.get_mana() < cost || robot.get_hp() <= 0 || unlocked == false)
     {
         return false;
     }

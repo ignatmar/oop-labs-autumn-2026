@@ -3,9 +3,9 @@
 
 Slow::Slow() : turns(1) {}
 
-void Slow::apply(Robot &robot) {}
+void Slow::apply(Robot &) {}
 
-void Slow::update(Robot &robot) { turns--; }
+void Slow::update(Robot &) { turns--; }
 
 bool Slow::is_active() { return turns > 0; }
 

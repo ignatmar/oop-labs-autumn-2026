@@ -8,8 +8,8 @@ class Slow : public Status
 
   public:
     Slow();
-    void apply(Robot &robot) override;
-    void update(Robot &robot) override;
+    void apply(Robot &) override;
+    void update(Robot &) override;
     bool is_active() override;
     void combine(Status *status) override;
     StatusType get_type() override;

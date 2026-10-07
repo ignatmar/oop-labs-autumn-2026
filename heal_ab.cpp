@@ -25,9 +25,9 @@ void Heal_ab::use(Robot &robot, Map &map, size_t x, size_t y)
     robot.set_mana(robot.get_mana() - cost);
 }
 
-bool Heal_ab::can_use(Robot &robot, Map &map, size_t x, size_t y)
+bool Heal_ab::can_use(Robot &robot, Map &, size_t, size_t)
 {
-    if (robot.get_mana() < cost || robot.get_hp() <= 0)
+    if (robot.get_mana() < cost || robot.get_hp() <= 0 || unlocked == false)
     {
         return false;
     }

@@ -13,8 +13,8 @@ class Around_ab : public Ability
   public:
     Around_ab(int radius, int damage, int cost);
 
-    void use(Robot &robot, Map &map, size_t x, size_t y) override;
-    bool can_use(Robot &robot, Map &map, size_t x, size_t y) override;
+    void use(Robot &robot, Map &map, size_t, size_t) override;
+    bool can_use(Robot &robot, Map &, size_t, size_t) override;
     int get_cost() override;
     void upgrade() override;
 

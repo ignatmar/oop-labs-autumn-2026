@@ -1,5 +1,4 @@
 #include "robot.hpp"
-#include "dmg_boost.hpp"
 #include "shield.hpp"
 int Robot::normalize(int x, int min_x, int max_x)
 {

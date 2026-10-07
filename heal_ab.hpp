@@ -14,7 +14,7 @@ class Heal_ab : public Ability
     Heal_ab(int radius, int delta_hp, int cost);
 
     void use(Robot &robot, Map &map, size_t x, size_t y) override;
-    bool can_use(Robot &robot, Map &map, size_t x, size_t y) override;
+    bool can_use(Robot &robot, Map &, size_t, size_t) override;
     int get_cost() override;
     void upgrade() override;
 
