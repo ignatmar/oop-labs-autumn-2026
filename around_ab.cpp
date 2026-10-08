@@ -28,7 +28,7 @@ void Around_ab::use(Robot &robot, Map &map, size_t, size_t)
                 std::pow(enemy->get_y() - yy, 2) <=
             pow(radius, 2))
         {
-            enemy->upd_hp(-damage);
+            map.move_robot(&robot, enemy->get_x(), enemy->get_y(), damage, 0);
             enemy->add_status(new Overdrive());
         }
     }

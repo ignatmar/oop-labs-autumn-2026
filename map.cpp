@@ -43,7 +43,8 @@ Map::Map(size_t width, size_t height, std::vector<std::vector<char>> field,
     }
 }
 
-int Map::move_robot(Robot *robot, int new_x, int new_y)
+int Map::move_robot(Robot *robot, int new_x, int new_y, int damage,
+                    int action_points)
 {
     if (!robot->can_move())
     {
@@ -58,14 +59,14 @@ int Map::move_robot(Robot *robot, int new_x, int new_y)
             Robot *other_robot = new_cell.get_robot();
             if (other_robot != nullptr)
             {
-                robot->interact(*other_robot);
+                robot->interact(*other_robot, damage);
                 if (other_robot->get_hp() <= 0)
                 {
                     field[new_y][new_x].set_robot(nullptr);
                     robot->add_kill();
                     int levels = robot->add_exp(robot->get_max_exp());
                     TraceLog(LOG_INFO, "LEVELS: %d", levels);
-                    robot->set_ap(robot->get_ap() - 3);
+                    robot->set_ap(robot->get_ap() - action_points);
                     return levels;
                 }
                 robot->set_ap(robot->get_ap() - 3);

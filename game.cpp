@@ -12,7 +12,7 @@ Game::Game(Map &map, Robot &player_robot)
       game_over(GAME_RUNNING), level_up(0)
 {
     around = new Around_ab(1, 10, 20);
-    range = new Range_ab(3, 20, 25);
+    range = new Range_ab(3, 15, 25);
     heal = new Heal_ab(0, 15, 20);
     teleport = new Teleport_ab(5, 0, 25);
 }
@@ -66,19 +66,19 @@ void Game::enemy_turn(Robot *enemy)
 
     if (e_x < p_x)
     {
-        map.move_robot(enemy, e_x + 1, e_y);
+        map.move_robot(enemy, e_x + 1, e_y, enemy->get_dmg(), 3);
     }
     if (e_x > p_x)
     {
-        map.move_robot(enemy, e_x - 1, e_y);
+        map.move_robot(enemy, e_x - 1, e_y, enemy->get_dmg(), 3);
     }
     if (e_y < p_y)
     {
-        map.move_robot(enemy, e_x, e_y + 1);
+        map.move_robot(enemy, e_x, e_y + 1, enemy->get_dmg(), 3);
     }
     if (e_y > p_y)
     {
-        map.move_robot(enemy, e_x, e_y - 1);
+        map.move_robot(enemy, e_x, e_y - 1, enemy->get_dmg(), 3);
     }
 
     enemy->update_statuses();
@@ -152,24 +152,24 @@ void Game::run(Render &render)
             if (turn == 1)
             {
                 if (IsKeyPressed(KEY_W))
-                    level_up +=
-                        map.move_robot(&player_robot, player_robot.get_x(),
-                                       player_robot.get_y() - 1);
+                    level_up += map.move_robot(
+                        &player_robot, player_robot.get_x(),
+                        player_robot.get_y() - 1, player_robot.get_dmg(), 3);
 
                 else if (IsKeyPressed(KEY_S))
-                    level_up +=
-                        map.move_robot(&player_robot, player_robot.get_x(),
-                                       player_robot.get_y() + 1);
+                    level_up += map.move_robot(
+                        &player_robot, player_robot.get_x(),
+                        player_robot.get_y() + 1, player_robot.get_dmg(), 3);
 
                 else if (IsKeyPressed(KEY_A))
-                    level_up +=
-                        map.move_robot(&player_robot, player_robot.get_x() - 1,
-                                       player_robot.get_y());
+                    level_up += map.move_robot(
+                        &player_robot, player_robot.get_x() - 1,
+                        player_robot.get_y(), player_robot.get_dmg(), 3);
 
                 else if (IsKeyPressed(KEY_D))
-                    level_up +=
-                        map.move_robot(&player_robot, player_robot.get_x() + 1,
-                                       player_robot.get_y());
+                    level_up += map.move_robot(
+                        &player_robot, player_robot.get_x() + 1,
+                        player_robot.get_y(), player_robot.get_dmg(), 3);
             }
 
             update(render);

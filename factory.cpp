@@ -23,7 +23,7 @@ void Factory::spawn(Map &map)
 
                 if (cell.can_walk() && cell.get_robot() == nullptr)
                 {
-                    Robot *robot = new Robot(10, 5, 50, 4, 100, 2, 10, true);
+                    Robot *robot = new Robot(100, 5, 50, 4, 100, 2, 10, true);
 
                     cell.set_robot(robot);
                     robot->set_coords(new_x, new_y);

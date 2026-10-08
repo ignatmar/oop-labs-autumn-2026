@@ -71,7 +71,7 @@ void Robot::lvl_up()
 {
     lvl++;
     hp_max += 100;
-    dmg += 30;
+    dmg += 2;
     mana_max += 50;
     exp_max += 80;
 }
@@ -115,15 +115,15 @@ void Robot::upd_hp(int delta_hp)
     set_hp(hp - damage);
 }
 
-void Robot::interact(Robot &other)
+void Robot::interact(Robot &other, int damage)
 {
     if (team == other.team)
     {
-        other.upd_hp(dmg);
+        other.upd_hp(damage);
     }
     else
     {
-        other.upd_hp(-dmg);
+        other.upd_hp(-damage);
     }
 }
 
@@ -244,3 +244,5 @@ int Robot::get_shield()
 
     return 0;
 }
+
+int Robot::get_dmg() { return dmg; }

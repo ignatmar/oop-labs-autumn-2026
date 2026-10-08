@@ -14,7 +14,7 @@ void Teleport_ab::use(Robot &robot, Map &map, size_t x, size_t y)
     {
         return;
     }
-    map.move_robot(&robot, x, y);
+    map.move_robot(&robot, x, y, damage, 0);
     robot.set_mana(robot.get_mana() - cost);
 }
 

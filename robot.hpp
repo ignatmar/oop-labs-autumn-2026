@@ -44,7 +44,7 @@ class Robot
     int get_lvl();
     void lvl_up();
     void upd_hp(int delta_hp);
-    void interact(Robot &other);
+    void interact(Robot &other, int damage);
     void set_coords(int x, int y);
     int get_x();
     int get_y();

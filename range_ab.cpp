@@ -16,7 +16,8 @@ void Range_ab::use(Robot &robot, Map &map, size_t x, size_t y)
         return;
     }
     Robot *enemy = map.get_cell(x, y).get_robot();
-    enemy->upd_hp(-damage);
+    // enemy->upd_hp(-damage);
+    map.move_robot(&robot, x, y, damage, 0);
     enemy->add_status(new Burning(2, 5));
     robot.set_mana(robot.get_mana() - cost);
 }
