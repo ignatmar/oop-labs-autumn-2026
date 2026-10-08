@@ -92,15 +92,12 @@ void Render::draw(Map &map, Robot &player,
     }
 
     draw_ap_text(map, player, enemy_robots);
-    if (!game_over)
-    {
-        draw_abilities(map, abilities);
-    }
+    draw_abilities(map, abilities);
     if (game_over)
     {
         draw_game_over(game_over);
     }
-    if (level_up)
+    if (level_up && !game_over)
     {
         draw_level_up();
     }
@@ -315,7 +312,7 @@ void Render::draw_level_up()
 int Render::get_level_up_choice()
 {
     int width = 700;
-    int height = 500;
+    int height = 700;
 
     int start_x = (GetScreenWidth() - width) / 2;
     int start_y = (GetScreenHeight() - height) / 2;

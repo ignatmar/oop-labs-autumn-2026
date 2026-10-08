@@ -115,7 +115,7 @@ void Game::update(Render &render)
 
     else
     {
-        if (GetTime() - enemy_move_timer >= 0.05)
+        if (GetTime() - enemy_move_timer >= 0.01)
         {
             for (Robot *enemy : map.get_enemy_robots())
             {
