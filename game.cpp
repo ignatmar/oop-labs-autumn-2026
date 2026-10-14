@@ -67,18 +67,26 @@ void Game::enemy_turn(Robot *enemy)
     if (e_x < p_x)
     {
         map.move_robot(enemy, e_x + 1, e_y, enemy->get_dmg(), 3);
-    }
-    if (e_x > p_x)
-    {
-        map.move_robot(enemy, e_x - 1, e_y, enemy->get_dmg(), 3);
+        if (enemy->get_x() != e_x || enemy->get_y() != e_y)
+            return;
     }
     if (e_y < p_y)
     {
         map.move_robot(enemy, e_x, e_y + 1, enemy->get_dmg(), 3);
+        if (enemy->get_x() != e_x || enemy->get_y() != e_y)
+            return;
+    }
+    if (e_x > p_x)
+    {
+        map.move_robot(enemy, e_x - 1, e_y, enemy->get_dmg(), 3);
+        if (enemy->get_x() != e_x || enemy->get_y() != e_y)
+            return;
     }
     if (e_y > p_y)
     {
         map.move_robot(enemy, e_x, e_y - 1, enemy->get_dmg(), 3);
+        if (enemy->get_x() != e_x || enemy->get_y() != e_y)
+            return;
     }
 
     enemy->update_statuses();
@@ -152,28 +160,49 @@ void Game::run(Render &render)
             if (turn == 1)
             {
                 if (IsKeyPressed(KEY_W))
-                    level_up += map.move_robot(
+                {
+                    int tmp = map.move_robot(
                         &player_robot, player_robot.get_x(),
                         player_robot.get_y() - 1, player_robot.get_dmg(), 3);
-
+                    if (tmp > 0)
+                    {
+                        level_up += tmp;
+                    }
+                }
                 else if (IsKeyPressed(KEY_S))
-                    level_up += map.move_robot(
+                {
+                    int tmp = map.move_robot(
                         &player_robot, player_robot.get_x(),
                         player_robot.get_y() + 1, player_robot.get_dmg(), 3);
+                    if (tmp > 0)
+                    {
+                        level_up += tmp;
+                    }
+                }
 
                 else if (IsKeyPressed(KEY_A))
-                    level_up += map.move_robot(
+                {
+                    int tmp = map.move_robot(
                         &player_robot, player_robot.get_x() - 1,
                         player_robot.get_y(), player_robot.get_dmg(), 3);
+                    if (tmp > 0)
+                    {
+                        level_up += tmp;
+                    }
+                }
 
                 else if (IsKeyPressed(KEY_D))
-                    level_up += map.move_robot(
+                {
+                    int tmp = map.move_robot(
                         &player_robot, player_robot.get_x() + 1,
                         player_robot.get_y(), player_robot.get_dmg(), 3);
+                    if (tmp > 0)
+                    {
+                        level_up += tmp;
+                    }
+                }
             }
-
             update(render);
-
             if (player_robot.get_kills() == map.get_enemy_robots().size())
             {
                 game_over = GAME_VICTORY;
@@ -184,8 +213,7 @@ void Game::run(Render &render)
         abilities.push_back(range);
         abilities.push_back(heal);
         abilities.push_back(teleport);
-        render.draw(map, player_robot, map.get_enemy_robots(), game_over,
-                    level_up, abilities);
+        render.draw(map, player_robot, game_over, level_up, abilities);
         if (level_up > 0)
         {
             int level_choice = render.get_level_up_choice();

@@ -29,13 +29,11 @@ int main()
 
     std::vector<Factory *> factories = {&factory_1};
 
-    Map map(25, 25, symbols, enemy_robots, factories);
+    Map map(25, 25, symbols, &player, enemy_robots, factories);
 
-    map.get_cell(1, 1).set_robot(&player);
-
-    map.get_cell(10, 10).set_robot(&enemy_1);
-    map.get_cell(20, 20).set_robot(&enemy_2);
-    map.get_cell(22, 5).set_robot(&enemy_3);
+    map.get_cell(10, 10).set_busy(true);
+    map.get_cell(20, 20).set_busy(true);
+    map.get_cell(22, 5).set_busy(true);
 
     map.set_factory(23, 6);
 

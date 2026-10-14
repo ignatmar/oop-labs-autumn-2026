@@ -2,14 +2,16 @@
 #include "cell.hpp"
 #include "factory.hpp"
 #include "robot.hpp"
+#include <cstddef>
 #include <cstdlib>
 #include <vector>
 
 bool Map::check_coords(size_t x, size_t y) { return (y < height && x < width); }
 
 Map::Map(size_t width, size_t height, std::vector<std::vector<char>> field,
-         std::vector<Robot *> &enemy_robots, std::vector<Factory *> &factories)
-    : steps(0), enemy_robots(enemy_robots), factories(factories)
+         Robot *player, std::vector<Robot *> enemy_robots,
+         std::vector<Factory *> &factories)
+    : steps(0), player(player), enemy_robots(enemy_robots), factories(factories)
 {
     if (width < MIN_MAP_SIZE)
     {
@@ -56,25 +58,21 @@ int Map::move_robot(Robot *robot, int new_x, int new_y, int damage,
         Cell &new_cell = field[new_y][new_x];
         if (new_cell.can_walk())
         {
-            Robot *other_robot = new_cell.get_robot();
-            if (other_robot != nullptr)
+            Robot *other_robot = find_robot(new_x, new_y);
+            if (other_robot != nullptr && other_robot->if_alive())
             {
-                robot->interact(*other_robot, damage);
-                if (other_robot->get_hp() <= 0)
+                int levels = robot->interact(*other_robot, damage);
+                robot->set_ap(robot->get_ap() - action_points);
+                if (levels >= 0)
                 {
-                    field[new_y][new_x].set_robot(nullptr);
-                    robot->add_kill();
-                    int levels = robot->add_exp(robot->get_max_exp());
-                    TraceLog(LOG_INFO, "LEVELS: %d", levels);
-                    robot->set_ap(robot->get_ap() - action_points);
+                    field[new_y][new_x].set_busy(false);
                     return levels;
                 }
-                robot->set_ap(robot->get_ap() - 3);
             }
             else
             {
-                field[robot->get_y()][robot->get_x()].set_robot(nullptr);
-                new_cell.set_robot(robot);
+                field[robot->get_y()][robot->get_x()].set_busy(false);
+                new_cell.set_busy(true);
                 robot->set_coords(new_x, new_y);
                 robot->set_ap(robot->get_ap() - new_cell.get_surface());
             }
@@ -94,10 +92,8 @@ const std::vector<Robot *> &Map::get_enemy_robots() { return enemy_robots; }
 void Map::set_factory(size_t x, size_t y)
 {
     if (!(x > 0 && y > 0 && x < width - 1 && y < height - 1 &&
-          field[y][x].get_robot() == nullptr &&
-          field[y + 1][x].get_robot() == nullptr &&
-          field[y][x + 1].get_robot() == nullptr &&
-          field[y + 1][x + 1].get_robot() == nullptr))
+          !field[y][x].if_busy() && !field[y + 1][x].if_busy() &&
+          !field[y][x + 1].if_busy() && !field[y + 1][x + 1].if_busy()))
     {
         return;
     }
@@ -114,7 +110,6 @@ int Map::get_steps() { return steps; }
 void Map::add_step() { steps++; }
 
 const std::vector<Factory *> &Map::get_factories() { return factories; }
-
 void Map::update_vision(int vision, size_t x, size_t y)
 {
     for (size_t yi = 0; yi < height; yi++)
@@ -129,17 +124,20 @@ void Map::update_vision(int vision, size_t x, size_t y)
     }
 }
 
-bool Map::take_item(int x, int y, ItemType &item)
+Robot *Map::find_robot(size_t x, size_t y)
 {
-    Cell &cell = field[y][x];
 
-    if (!cell.if_has_item())
+    if (player->get_x() == x && player->get_y() == y)
     {
-        return false;
+        return player;
     }
 
-    item = cell.get_item();
-    cell.remove_item();
-
-    return true;
+    for (Robot *enemy : enemy_robots)
+    {
+        if (x == enemy->get_x() && y == enemy->get_y())
+        {
+            return enemy;
+        }
+    }
+    return nullptr;
 }

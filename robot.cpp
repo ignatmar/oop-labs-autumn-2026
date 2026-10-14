@@ -18,7 +18,7 @@ Robot::Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max,
     : hp(hp_max), hp_max(hp_max), dmg(dmg), mana(mana_max), mana_max(mana_max),
       exp(0), exp_max(exp_max), lvl(0), x(0), y(0), team(team), ap(speed * 2),
       ap_max(speed * 2), kills(0), speed(speed), vision(vision),
-      visible(visible)
+      visible(visible), alive(true)
 {
 }
 
@@ -115,7 +115,7 @@ void Robot::upd_hp(int delta_hp)
     set_hp(hp - damage);
 }
 
-void Robot::interact(Robot &other, int damage)
+int Robot::interact(Robot &other, int damage)
 {
     if (team == other.team)
     {
@@ -124,7 +124,23 @@ void Robot::interact(Robot &other, int damage)
     else
     {
         other.upd_hp(-damage);
+        if (other.get_hp() <= 0)
+        {
+            other.make_dead();
+            add_kill();
+            int levels = add_exp(get_max_exp() / 2);
+            TraceLog(LOG_INFO, "Robot::interact returns LEVELS: %d", levels);
+            if (levels > 0)
+            {
+                return levels;
+            }
+            else
+            {
+                return 0;
+            }
+        }
     }
+    return -1;
 }
 
 void Robot::set_coords(int x, int y)
@@ -246,3 +262,7 @@ int Robot::get_shield()
 }
 
 int Robot::get_dmg() { return dmg; }
+
+void Robot::make_dead() { alive = false; }
+
+bool Robot::if_alive() { return alive; }

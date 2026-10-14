@@ -21,11 +21,11 @@ void Factory::spawn(Map &map)
             {
                 Cell &cell = map.get_cell(new_x, new_y);
 
-                if (cell.can_walk() && cell.get_robot() == nullptr)
+                if (cell.can_walk() && !cell.if_busy())
                 {
                     Robot *robot = new Robot(100, 5, 50, 4, 100, 2, 10, true);
 
-                    cell.set_robot(robot);
+                    // cell.set_robot(robot);
                     robot->set_coords(new_x, new_y);
                     map.push_enemy(robot);
                     return;

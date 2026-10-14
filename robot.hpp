@@ -23,6 +23,9 @@ class Robot
     int speed;
     int vision;
     bool visible;
+
+    bool alive;
+
     int normalize(int x, int min_x, int max_x);
 
     std::vector<Status *> statuses;
@@ -44,7 +47,7 @@ class Robot
     int get_lvl();
     void lvl_up();
     void upd_hp(int delta_hp);
-    void interact(Robot &other, int damage);
+    int interact(Robot &other, int damage);
     void set_coords(int x, int y);
     int get_x();
     int get_y();
@@ -69,7 +72,6 @@ class Robot
 
     int get_dmg();
 
-    void add_item(ItemType type);
-
-    bool use_item(ItemType type);
+    void make_dead();
+    bool if_alive();
 };

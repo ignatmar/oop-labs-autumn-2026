@@ -7,13 +7,12 @@
 
 Render::Render(int draw_scale) { this->draw_scale = draw_scale; }
 
-void Render::draw(Map &map, Robot &player,
-                  const std::vector<Robot *> enemy_robots, int game_over,
-                  int level_up, std::vector<Ability *> abilities)
+void Render::draw(Map &map, Robot &player, int game_over, int level_up,
+                  std::vector<Ability *> abilities)
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-
+    std::vector<Robot *> enemy_robots = map.get_enemy_robots();
     for (int y = 0; y < map.get_height(); y++)
     {
         for (int x = 0; x < map.get_width(); x++)
@@ -57,41 +56,66 @@ void Render::draw(Map &map, Robot &player,
 
             DrawRectangleLines(x * draw_scale, y * draw_scale, draw_scale,
                                draw_scale, GRAY);
-            if (cell.get_robot() != nullptr)
-            {
-                if (cell.get_robot()->get_team() == 1)
-                {
-                    // DrawCircle(x * draw_scale + draw_scale / 2,
-                    //           y * draw_scale + draw_scale / 2,
-                    //           draw_scale / 3.0, BLUE);
 
-                    DrawTexturePro(player_texture,
-                                   {0, 0, (float)player_texture.width,
-                                    (float)player_texture.height},
-                                   {(float)(x * draw_scale),
-                                    (float)(y * draw_scale), (float)draw_scale,
-                                    (float)draw_scale},
-                                   {0, 0}, 0, WHITE);
-                }
-                else if (std::abs(x - p_x) + std::abs(y - p_y) < rad ||
-                         cell.if_visible())
+            // if (cell.get_robot() != nullptr)
+            // {
+            //     if (cell.get_robot()->get_team() == 1)
+            //     {
+            //         // DrawCircle(x * draw_scale + draw_scale / 2,
+            //         //           y * draw_scale + draw_scale / 2,
+            //         //           draw_scale / 3.0, BLUE);
+            //
+            //         DrawTexturePro(player_texture,
+            //                        {0, 0, (float)player_texture.width,
+            //                         (float)player_texture.height},
+            //                        {(float)(x * draw_scale),
+            //                         (float)(y * draw_scale),
+            //                         (float)draw_scale, (float)draw_scale},
+            //                        {0, 0}, 0, WHITE);
+            //     }
+            //     else if (std::abs(x - p_x) + std::abs(y - p_y) < rad ||
+            //              cell.if_visible())
+            //     {
+            //         // DrawCircle(x * draw_scale + draw_scale / 2,
+            //         //          y * draw_scale + draw_scale / 2,
+            //         //           draw_scale / 3.0, RED);
+            //         DrawTexturePro(enemy_texture,
+            //                        {0, 0, (float)player_texture.width,
+            //                         (float)player_texture.height},
+            //                        {(float)(x * draw_scale),
+            //                         (float)(y * draw_scale),
+            //                         (float)draw_scale, (float)draw_scale},
+            //                        {0, 0}, 0, WHITE);
+            //     }
+            // }
+            DrawTexturePro(player_texture,
+                           {0, 0, (float)player_texture.width,
+                            (float)player_texture.height},
+                           {(float)(p_x * draw_scale),
+                            (float)(p_y * draw_scale), (float)draw_scale,
+                            (float)draw_scale},
+                           {0, 0}, 0, WHITE);
+            for (Robot *enemy : enemy_robots)
+            {
+                int e_x = enemy->get_x();
+                int e_y = enemy->get_y();
+                if (enemy->if_alive() &&
+                    (std::abs(e_x - p_x) + std::abs(e_y - p_y) < rad ||
+                     map.get_cell(e_x, e_y).if_visible()))
                 {
-                    // DrawCircle(x * draw_scale + draw_scale / 2,
-                    //          y * draw_scale + draw_scale / 2,
-                    //           draw_scale / 3.0, RED);
                     DrawTexturePro(enemy_texture,
                                    {0, 0, (float)player_texture.width,
                                     (float)player_texture.height},
-                                   {(float)(x * draw_scale),
-                                    (float)(y * draw_scale), (float)draw_scale,
-                                    (float)draw_scale},
+                                   {(float)(e_x * draw_scale),
+                                    (float)(e_y * draw_scale),
+                                    (float)draw_scale, (float)draw_scale},
                                    {0, 0}, 0, WHITE);
                 }
             }
         }
     }
 
-    draw_ap_text(map, player, enemy_robots);
+    draw_ap_text(map, player);
     draw_abilities(map, abilities);
     if (game_over)
     {
@@ -158,8 +182,7 @@ void Render::draw_abilities(Map &map, std::vector<Ability *> abilities)
     }
 }
 
-void Render::draw_ap_text(Map &map, Robot &player,
-                          std::vector<Robot *> enemy_robots)
+void Render::draw_ap_text(Map &map, Robot &player)
 {
     int panel_x = map.get_width() * draw_scale;
     int panel_width = 200;
@@ -209,7 +232,7 @@ void Render::draw_ap_text(Map &map, Robot &player,
     DrawRectangle(panel_x + 20, name_y + 205, 160, 15, WHITE);
 
     int y = 290;
-
+    std::vector<Robot *> enemy_robots = map.get_enemy_robots();
     for (size_t i = 0; i < enemy_robots.size(); i++)
     {
         if (enemy_robots[i]->get_hp() > 0)
