@@ -22,17 +22,18 @@ class Render
   public:
     Render(int draw_scale);
 
+    void draw(Map &map, Robot &player, std::vector<Robot *> &enemies, int game_over, int level_up,
+              std::vector<Ability *> abilities);
     void draw(Map &map, Robot &player, int game_over, int level_up,
               std::vector<Ability *> abilities);
     void start(Map &map);
     void draw_ap_text(Map &map, Robot &player);
+    void draw_ap_text(Map &map, Robot &player, std::vector<Robot *> &enemies);
     void draw_game_over(int game_over);
 
     void draw_abilities(Map &map, std::vector<Ability *> abilities);
 
     void draw_level_up();
-
-    int get_level_up_choice();
 
     int get_draw_scale();
 };

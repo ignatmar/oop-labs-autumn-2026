@@ -1,9 +1,8 @@
 #pragma once
 
 #include "ability.hpp"
-#include "map.hpp"
 #include "render.hpp"
-#include "robot.hpp"
+#include "world.hpp"
 
 enum GAME_STATUS
 {
@@ -14,8 +13,7 @@ enum GAME_STATUS
 class Game
 {
   private:
-    Map map;
-    Robot &player_robot;
+    World &world;
     int turn;
     double enemy_move_timer;
     GAME_STATUS game_over;
@@ -29,13 +27,12 @@ class Game
     int level_up;
 
   public:
-    Game(Map &map, Robot &player_robot);
+    Game(World &world);
     void run(Render &render);
     int get_turn();
     void player_turn(Render &render);
-    void enemy_turn(Robot *enemy);
     void end_turn();
     void update(Render &render);
-    void kill_enemy(Robot *enemy);
+
     void level_up_choice(int choice);
 };

@@ -1,7 +1,7 @@
 #include "range_ab.hpp"
 #include "burning.hpp"
-#include "map.hpp"
 #include "robot.hpp"
+#include "world.hpp"
 #include <cmath>
 
 Range_ab::Range_ab(int range, int damage, int cost)
@@ -9,25 +9,28 @@ Range_ab::Range_ab(int range, int damage, int cost)
 {
 }
 
-void Range_ab::use(Robot &robot, Map &map, size_t x, size_t y)
+void Range_ab::use(Robot &robot, World &world, size_t x, size_t y)
 {
-    if (!can_use(robot, map, x, y))
+    if (!can_use(robot, world, x, y))
     {
         return;
     }
-    Robot *enemy = map.find_robot(x, y);
-    map.move_robot(&robot, x, y, damage, 0);
-    enemy->add_status(new Burning(2, 5));
+    Robot *enemy = world.find_robot((int)x, (int)y);
+    world.move_robot(&robot, (int)x, (int)y, damage, 0);
+    if (enemy != nullptr)
+    {
+        enemy->add_status(new Burning(2, 5));
+    }
     robot.set_mana(robot.get_mana() - cost);
 }
 
-bool Range_ab::can_use(Robot &robot, Map &map, size_t x, size_t y)
+bool Range_ab::can_use(Robot &robot, World &world, size_t x, size_t y)
 {
     if (robot.get_mana() < cost || robot.get_hp() <= 0 || unlocked == false)
     {
         return false;
     }
-    Robot *enemy = map.find_robot(x, y);
+    Robot *enemy = world.find_robot((int)x, (int)y);
     if (enemy == nullptr || enemy == &robot)
     {
         return false;

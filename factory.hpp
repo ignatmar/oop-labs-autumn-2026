@@ -1,6 +1,6 @@
 #pragma once
 
-#include "map.hpp"
+class World;
 
 class Factory
 {
@@ -10,5 +10,5 @@ class Factory
 
   public:
     Factory(int x, int y, int freq);
-    void spawn(Map &map);
+    void spawn(World &world);
 };

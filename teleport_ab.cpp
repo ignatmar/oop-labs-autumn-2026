@@ -1,6 +1,6 @@
 #include "teleport_ab.hpp"
-#include "map.hpp"
 #include "robot.hpp"
+#include "world.hpp"
 #include <cmath>
 
 Teleport_ab::Teleport_ab(int range, int damage, int cost)
@@ -8,17 +8,17 @@ Teleport_ab::Teleport_ab(int range, int damage, int cost)
 {
 }
 
-void Teleport_ab::use(Robot &robot, Map &map, size_t x, size_t y)
+void Teleport_ab::use(Robot &robot, World &world, size_t x, size_t y)
 {
-    if (!can_use(robot, map, x, y))
+    if (!can_use(robot, world, x, y))
     {
         return;
     }
-    map.move_robot(&robot, x, y, damage, 0);
+    world.move_robot(&robot, (int)x, (int)y, damage, 0);
     robot.set_mana(robot.get_mana() - cost);
 }
 
-bool Teleport_ab::can_use(Robot &robot, Map &, size_t x, size_t y)
+bool Teleport_ab::can_use(Robot &robot, World &, size_t x, size_t y)
 {
     if (robot.get_mana() < cost || robot.get_hp() <= 0 || unlocked == false)
     {

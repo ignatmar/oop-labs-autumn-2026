@@ -7,12 +7,11 @@
 
 Render::Render(int draw_scale) { this->draw_scale = draw_scale; }
 
-void Render::draw(Map &map, Robot &player, int game_over, int level_up,
+void Render::draw(Map &map, Robot &player, std::vector<Robot *> &enemies, int game_over, int level_up,
                   std::vector<Ability *> abilities)
 {
     BeginDrawing();
     ClearBackground(RAYWHITE);
-    std::vector<Robot *> enemy_robots = map.get_enemy_robots();
     for (int y = 0; y < map.get_height(); y++)
     {
         for (int x = 0; x < map.get_width(); x++)
@@ -57,37 +56,6 @@ void Render::draw(Map &map, Robot &player, int game_over, int level_up,
             DrawRectangleLines(x * draw_scale, y * draw_scale, draw_scale,
                                draw_scale, GRAY);
 
-            // if (cell.get_robot() != nullptr)
-            // {
-            //     if (cell.get_robot()->get_team() == 1)
-            //     {
-            //         // DrawCircle(x * draw_scale + draw_scale / 2,
-            //         //           y * draw_scale + draw_scale / 2,
-            //         //           draw_scale / 3.0, BLUE);
-            //
-            //         DrawTexturePro(player_texture,
-            //                        {0, 0, (float)player_texture.width,
-            //                         (float)player_texture.height},
-            //                        {(float)(x * draw_scale),
-            //                         (float)(y * draw_scale),
-            //                         (float)draw_scale, (float)draw_scale},
-            //                        {0, 0}, 0, WHITE);
-            //     }
-            //     else if (std::abs(x - p_x) + std::abs(y - p_y) < rad ||
-            //              cell.if_visible())
-            //     {
-            //         // DrawCircle(x * draw_scale + draw_scale / 2,
-            //         //          y * draw_scale + draw_scale / 2,
-            //         //           draw_scale / 3.0, RED);
-            //         DrawTexturePro(enemy_texture,
-            //                        {0, 0, (float)player_texture.width,
-            //                         (float)player_texture.height},
-            //                        {(float)(x * draw_scale),
-            //                         (float)(y * draw_scale),
-            //                         (float)draw_scale, (float)draw_scale},
-            //                        {0, 0}, 0, WHITE);
-            //     }
-            // }
             DrawTexturePro(player_texture,
                            {0, 0, (float)player_texture.width,
                             (float)player_texture.height},
@@ -95,27 +63,33 @@ void Render::draw(Map &map, Robot &player, int game_over, int level_up,
                             (float)(p_y * draw_scale), (float)draw_scale,
                             (float)draw_scale},
                            {0, 0}, 0, WHITE);
-            for (Robot *enemy : enemy_robots)
-            {
-                int e_x = enemy->get_x();
-                int e_y = enemy->get_y();
-                if (enemy->if_alive() &&
-                    (std::abs(e_x - p_x) + std::abs(e_y - p_y) < rad ||
-                     map.get_cell(e_x, e_y).if_visible()))
-                {
-                    DrawTexturePro(enemy_texture,
-                                   {0, 0, (float)player_texture.width,
-                                    (float)player_texture.height},
-                                   {(float)(e_x * draw_scale),
-                                    (float)(e_y * draw_scale),
-                                    (float)draw_scale, (float)draw_scale},
-                                   {0, 0}, 0, WHITE);
-                }
-            }
+        }
+    }
+    for (Robot *enemy : enemies)
+    {
+        if (enemy == nullptr || !enemy->if_alive())
+        {
+            continue;
+        }
+        int e_x = enemy->get_x();
+        int e_y = enemy->get_y();
+        int p_x = player.get_x();
+        int p_y = player.get_y();
+        int rad = player.get_vision();
+        if (std::abs(e_x - p_x) + std::abs(e_y - p_y) < rad ||
+            map.get_cell(e_x, e_y).if_visible())
+        {
+            DrawTexturePro(enemy_texture,
+                           {0, 0, (float)enemy_texture.width,
+                            (float)enemy_texture.height},
+                           {(float)(e_x * draw_scale),
+                            (float)(e_y * draw_scale),
+                            (float)draw_scale, (float)draw_scale},
+                           {0, 0}, 0, WHITE);
         }
     }
 
-    draw_ap_text(map, player);
+    draw_ap_text(map, player, enemies);
     draw_abilities(map, abilities);
     if (game_over)
     {
@@ -182,7 +156,14 @@ void Render::draw_abilities(Map &map, std::vector<Ability *> abilities)
     }
 }
 
-void Render::draw_ap_text(Map &map, Robot &player)
+void Render::draw(Map &map, Robot &player, int game_over, int level_up,
+                  std::vector<Ability *> abilities)
+{
+    std::vector<Robot *> empty_enemies;
+    draw(map, player, empty_enemies, game_over, level_up, abilities);
+}
+
+void Render::draw_ap_text(Map &map, Robot &player, std::vector<Robot *> &enemies)
 {
     int panel_x = map.get_width() * draw_scale;
     int panel_width = 200;
@@ -232,7 +213,8 @@ void Render::draw_ap_text(Map &map, Robot &player)
     DrawRectangle(panel_x + 20, name_y + 205, 160, 15, WHITE);
 
     int y = 290;
-    std::vector<Robot *> enemy_robots = map.get_enemy_robots();
+    std::vector<Robot *> &enemy_robots = enemies;
+    (void)enemy_robots;
     for (size_t i = 0; i < enemy_robots.size(); i++)
     {
         if (enemy_robots[i]->get_hp() > 0)
@@ -279,6 +261,12 @@ void Render::draw_ap_text(Map &map, Robot &player)
             y += 200;
         }
     }
+}
+
+void Render::draw_ap_text(Map &map, Robot &player)
+{
+    std::vector<Robot *> empty_enemies;
+    draw_ap_text(map, player, empty_enemies);
 }
 
 void Render::draw_game_over(int game_over)
@@ -332,52 +320,4 @@ void Render::draw_level_up()
     DrawText("Teleport", x2 + 70, y2 + 110, 25, WHITE);
 }
 
-int Render::get_level_up_choice()
-{
-    int width = 700;
-    int height = 700;
 
-    int start_x = (GetScreenWidth() - width) / 2;
-    int start_y = (GetScreenHeight() - height) / 2;
-
-    int square_size = 250;
-    int spacing = 30;
-
-    int x1 = start_x + 70;
-    int x2 = x1 + square_size + spacing;
-    int y1 = start_y + 100;
-    int y2 = y1 + square_size + spacing;
-
-    if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    {
-        return 0;
-    }
-
-    Vector2 mouse = GetMousePosition();
-
-    if (mouse.x >= x1 && mouse.x <= x1 + square_size && mouse.y >= y1 &&
-        mouse.y <= y1 + square_size)
-    {
-        return 1;
-    }
-
-    if (mouse.x >= x2 && mouse.x <= x2 + square_size && mouse.y >= y1 &&
-        mouse.y <= y1 + square_size)
-    {
-        return 2;
-    }
-
-    if (mouse.x >= x1 && mouse.x <= x1 + square_size && mouse.y >= y2 &&
-        mouse.y <= y2 + square_size)
-    {
-        return 3;
-    }
-
-    if (mouse.x >= x2 && mouse.x <= x2 + square_size && mouse.y >= y2 &&
-        mouse.y <= y2 + square_size)
-    {
-        return 4;
-    }
-
-    return 0;
-}

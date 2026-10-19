@@ -3,13 +3,14 @@
 #include "around_ab.hpp"
 #include "factory.hpp"
 #include "heal_ab.hpp"
+#include "input.hpp"
 #include "range_ab.hpp"
 #include "teleport_ab.hpp"
 #include <raylib.h>
 
-Game::Game(Map &map, Robot &player_robot)
-    : map(map), player_robot(player_robot), turn(1), enemy_move_timer(0),
-      game_over(GAME_RUNNING), level_up(0)
+Game::Game(World &world)
+    : world(world), turn(1), enemy_move_timer(0), game_over(GAME_RUNNING),
+      level_up(0)
 {
     around = new Around_ab(1, 10, 20);
     range = new Range_ab(3, 15, 25);
@@ -19,95 +20,65 @@ Game::Game(Map &map, Robot &player_robot)
 
 void Game::player_turn(Render &render)
 {
-    if (IsKeyPressed(KEY_ONE) && player_robot.can_use_ability())
+    if (!world.player_can_use_ability())
     {
-        around->use(player_robot, map, 0, 0);
+        world.player_update_statuses();
+        if (world.is_player_turn_over())
+        {
+            end_turn();
+        }
+        return;
     }
 
-    if (IsKeyPressed(KEY_TWO) && player_robot.can_use_ability())
+    Input::AbilityCmd cmd = Input::get_ability(render.get_draw_scale());
+    if (!cmd.used)
     {
-        Vector2 mouse = GetMousePosition();
-
-        int x = mouse.x / render.get_draw_scale();
-        int y = mouse.y / render.get_draw_scale();
-
-        range->use(player_robot, map, x, y);
+        world.player_update_statuses();
+        if (world.is_player_turn_over())
+        {
+            end_turn();
+        }
+        return;
     }
 
-    if (IsKeyPressed(KEY_THREE) && player_robot.can_use_ability())
+
+    if (cmd.slot == 1)
     {
-        heal->use(player_robot, map, 0, 0);
+        around->use(world.get_player_ref(), world, 0, 0);
+    }
+    else if (cmd.slot == 2)
+    {
+        range->use(world.get_player_ref(), world, (size_t)cmd.target_x, (size_t)cmd.target_y);
+    }
+    else if (cmd.slot == 3)
+    {
+        heal->use(world.get_player_ref(), world, 0, 0);
+    }
+    else if (cmd.slot == 4)
+    {
+        teleport->use(world.get_player_ref(), world, (size_t)cmd.target_x, (size_t)cmd.target_y);
     }
 
-    if (IsKeyPressed(KEY_FOUR) && player_robot.can_use_ability())
-    {
-        Vector2 mouse = GetMousePosition();
-
-        int x = mouse.x / render.get_draw_scale();
-        int y = mouse.y / render.get_draw_scale();
-
-        teleport->use(player_robot, map, x, y);
-    }
-
-    player_robot.update_statuses();
-
-    if (player_robot.get_ap() <= 0)
+    world.player_update_statuses();
+    if (world.is_player_turn_over())
     {
         end_turn();
     }
 }
 
-void Game::enemy_turn(Robot *enemy)
-{
-    int e_x = enemy->get_x();
-    int e_y = enemy->get_y();
-    int p_x = player_robot.get_x();
-    int p_y = player_robot.get_y();
 
-    if (e_x < p_x)
-    {
-        map.move_robot(enemy, e_x + 1, e_y, enemy->get_dmg(), 3);
-        if (enemy->get_x() != e_x || enemy->get_y() != e_y)
-            return;
-    }
-    if (e_y < p_y)
-    {
-        map.move_robot(enemy, e_x, e_y + 1, enemy->get_dmg(), 3);
-        if (enemy->get_x() != e_x || enemy->get_y() != e_y)
-            return;
-    }
-    if (e_x > p_x)
-    {
-        map.move_robot(enemy, e_x - 1, e_y, enemy->get_dmg(), 3);
-        if (enemy->get_x() != e_x || enemy->get_y() != e_y)
-            return;
-    }
-    if (e_y > p_y)
-    {
-        map.move_robot(enemy, e_x, e_y - 1, enemy->get_dmg(), 3);
-        if (enemy->get_x() != e_x || enemy->get_y() != e_y)
-            return;
-    }
-
-    enemy->update_statuses();
-}
 
 void Game::end_turn()
 {
     turn = 0;
-    map.add_step();
-    for (Factory *factory : map.get_factories())
-    {
-        factory->spawn(map);
-    }
+    world.add_step();
+    world.spawn_from_factories();
 }
 
 void Game::update(Render &render)
 {
-    map.update_vision(player_robot.get_vision(), player_robot.get_x(),
-                      player_robot.get_y());
-
-    if (player_robot.get_hp() <= 0)
+    world.update_vision();
+    if (!world.player_alive())
     {
         game_over = GAME_DEFEAT;
         return;
@@ -125,23 +96,13 @@ void Game::update(Render &render)
     {
         if (GetTime() - enemy_move_timer >= 0.01)
         {
-            for (Robot *enemy : map.get_enemy_robots())
+            world.process_enemy_turns(enemy_move_timer);
+            enemy_move_timer = GetTime();
+            if (!world.has_enemies_with_ap())
             {
-                if (enemy->get_ap() > 0 && enemy->get_hp() > 0)
-                {
-                    enemy_turn(enemy);
-                    enemy_move_timer = GetTime();
-                    return;
-                }
+                world.refill_ap();
+                turn = 1;
             }
-
-            for (Robot *enemy : map.get_enemy_robots())
-            {
-                enemy->set_ap(enemy->get_max_ap());
-            }
-
-            player_robot.set_ap(player_robot.get_max_ap());
-            turn = 1;
         }
     }
 }
@@ -150,7 +111,7 @@ int Game::get_turn() { return turn; }
 
 void Game::run(Render &render)
 {
-    render.start(map);
+    render.start(world.get_map());
 
     while (!WindowShouldClose())
     {
@@ -159,43 +120,10 @@ void Game::run(Render &render)
 
             if (turn == 1)
             {
-                if (IsKeyPressed(KEY_W))
+                Input::MoveCmd mv = Input::get_move();
+                if (mv.moved)
                 {
-                    int tmp = map.move_robot(
-                        &player_robot, player_robot.get_x(),
-                        player_robot.get_y() - 1, player_robot.get_dmg(), 3);
-                    if (tmp > 0)
-                    {
-                        level_up += tmp;
-                    }
-                }
-                else if (IsKeyPressed(KEY_S))
-                {
-                    int tmp = map.move_robot(
-                        &player_robot, player_robot.get_x(),
-                        player_robot.get_y() + 1, player_robot.get_dmg(), 3);
-                    if (tmp > 0)
-                    {
-                        level_up += tmp;
-                    }
-                }
-
-                else if (IsKeyPressed(KEY_A))
-                {
-                    int tmp = map.move_robot(
-                        &player_robot, player_robot.get_x() - 1,
-                        player_robot.get_y(), player_robot.get_dmg(), 3);
-                    if (tmp > 0)
-                    {
-                        level_up += tmp;
-                    }
-                }
-
-                else if (IsKeyPressed(KEY_D))
-                {
-                    int tmp = map.move_robot(
-                        &player_robot, player_robot.get_x() + 1,
-                        player_robot.get_y(), player_robot.get_dmg(), 3);
+                    int tmp = world.move_player(mv.dx, mv.dy, 3);
                     if (tmp > 0)
                     {
                         level_up += tmp;
@@ -203,7 +131,7 @@ void Game::run(Render &render)
                 }
             }
             update(render);
-            if (player_robot.get_kills() == map.get_enemy_robots().size())
+            if (world.all_enemies_dead())
             {
                 game_over = GAME_VICTORY;
             }
@@ -213,10 +141,18 @@ void Game::run(Render &render)
         abilities.push_back(range);
         abilities.push_back(heal);
         abilities.push_back(teleport);
-        render.draw(map, player_robot, game_over, level_up, abilities);
+        if (world.player_alive())
+        {
+            render.draw(world.get_map(), world.get_player_ref(), world.get_enemies_list(), game_over, level_up, abilities);
+        }
+        else
+        {
+            Robot dummy(0, 0, 0, 0, 0, 0, 0, false);
+            render.draw(world.get_map(), dummy, world.get_enemies_list(), game_over, level_up, abilities);
+        }
         if (level_up > 0)
         {
-            int level_choice = render.get_level_up_choice();
+            int level_choice = Input::get_level_up_choice();
             level_up_choice(level_choice);
         }
     }

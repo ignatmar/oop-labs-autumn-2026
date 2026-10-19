@@ -1,16 +1,16 @@
 #include "heal_ab.hpp"
-#include "map.hpp"
 #include "robot.hpp"
 #include "shield.hpp"
+#include "world.hpp"
 
 Heal_ab::Heal_ab(int range, int delta_hp, int cost)
     : range(range), delta_hp(delta_hp), cost(cost)
 {
 }
 
-void Heal_ab::use(Robot &robot, Map &map, size_t x, size_t y)
+void Heal_ab::use(Robot &robot, World &world, size_t x, size_t y)
 {
-    if (!can_use(robot, map, x, y))
+    if (!can_use(robot, world, x, y))
     {
         return;
     }
@@ -25,7 +25,7 @@ void Heal_ab::use(Robot &robot, Map &map, size_t x, size_t y)
     robot.set_mana(robot.get_mana() - cost);
 }
 
-bool Heal_ab::can_use(Robot &robot, Map &, size_t, size_t)
+bool Heal_ab::can_use(Robot &robot, World &, size_t, size_t)
 {
     if (robot.get_mana() < cost || robot.get_hp() <= 0 || unlocked == false)
     {

@@ -3,6 +3,7 @@
 #include "map.hpp"
 #include "render.hpp"
 #include "robot.hpp"
+#include "world.hpp"
 int main()
 {
     std::vector<std::vector<char>> symbols = {{'.', '.', '.', 'M', 'M'},
@@ -25,19 +26,16 @@ int main()
 
     Factory factory_1(23, 6, 3);
 
-    std::vector<Robot *> enemy_robots = {&enemy_1, &enemy_2, &enemy_3};
+    Map map(25, 25, symbols);
+    World world(map);
+    world.set_player(&player);
+    world.add_enemy(&enemy_1);
+    world.add_enemy(&enemy_2);
+    world.add_enemy(&enemy_3);
+    world.add_factory(&factory_1);
+    world.set_factory(23, 6);
 
-    std::vector<Factory *> factories = {&factory_1};
-
-    Map map(25, 25, symbols, &player, enemy_robots, factories);
-
-    map.get_cell(10, 10).set_busy(true);
-    map.get_cell(20, 20).set_busy(true);
-    map.get_cell(22, 5).set_busy(true);
-
-    map.set_factory(23, 6);
-
-    Game game(map, player);
+    Game game(world);
 
     Render render(40);
 

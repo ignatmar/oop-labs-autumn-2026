@@ -1,0 +1,23 @@
+#pragma once
+
+class Input
+{
+  public:
+    struct MoveCmd
+    {
+        bool moved;
+        int dx, dy;
+    };
+
+    struct AbilityCmd
+    {
+        bool used;
+        int slot;
+        int target_x;
+        int target_y;
+    };
+
+    static int get_level_up_choice();
+    static MoveCmd get_move();
+    static AbilityCmd get_ability(int draw_scale);
+};
