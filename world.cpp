@@ -8,7 +8,7 @@ World::World(Map &map)
 {
     enemy_heal = new Heal_ab(0, 0, 0);
     enemy_heal->unlock();
-    teleport = new Teleport_ab(5, 0, 0);
+    teleport = new Teleport_ab(5, 0, 10);
     teleport->unlock();
 }
 

@@ -84,13 +84,12 @@ void Render::draw(World &world, int game_over, int level_up,
 
     if (player.if_alive())
     {
-        DrawTexturePro(player_texture,
-                       {0, 0, (float)player_texture.width,
-                        (float)player_texture.height},
-                       {(float)(offset_x + p_x * draw_scale),
-                        (float)(p_y * draw_scale), (float)draw_scale,
-                        (float)draw_scale},
-                       {0, 0}, 0, WHITE);
+        DrawTexturePro(
+            player_texture,
+            {0, 0, (float)player_texture.width, (float)player_texture.height},
+            {(float)(offset_x + p_x * draw_scale), (float)(p_y * draw_scale),
+             (float)draw_scale, (float)draw_scale},
+            {0, 0}, 0, WHITE);
     }
 
     for (Robot *enemy : enemies)
@@ -104,13 +103,13 @@ void Render::draw(World &world, int game_over, int level_up,
         if (std::abs(e_x - p_x) + std::abs(e_y - p_y) < rad ||
             map.get_cell(e_x, e_y).if_visible())
         {
-            DrawTexturePro(enemy_texture,
-                           {0, 0, (float)enemy_texture.width,
-                            (float)enemy_texture.height},
-                           {(float)(offset_x + e_x * draw_scale),
-                            (float)(e_y * draw_scale),
-                            (float)draw_scale, (float)draw_scale},
-                           {0, 0}, 0, WHITE);
+            DrawTexturePro(
+                enemy_texture,
+                {0, 0, (float)enemy_texture.width, (float)enemy_texture.height},
+                {(float)(offset_x + e_x * draw_scale),
+                 (float)(e_y * draw_scale), (float)draw_scale,
+                 (float)draw_scale},
+                {0, 0}, 0, WHITE);
         }
     }
 
@@ -222,16 +221,14 @@ void Render::draw_player_bars(World &world)
              player.get_max_mana(), BLUE, "MANA");
     y += bar_height + spacing;
 
-    draw_bar(x, y, bar_width, bar_height, player.get_ap(),
-             player.get_max_ap(), YELLOW, "AP");
+    draw_bar(x, y, bar_width, bar_height, player.get_ap(), player.get_max_ap(),
+             YELLOW, "AP");
     y += bar_height + spacing;
 
-    std::string shield = "SHIELD: " + std::to_string(player.get_shield());
-
+    std::string shield = "";
     std::vector<std::string> labels = player.get_status_labels();
     if (!labels.empty())
     {
-        shield += " | ";
         for (size_t i = 0; i < labels.size(); i++)
         {
             if (i > 0)
@@ -267,11 +264,11 @@ void Render::draw_bar(int x, int y, int width, int height, int value,
     DrawRectangle(x, y, (int)(width * percent), height, color);
     DrawRectangleLines(x, y, width, height, WHITE);
 
-    std::string text = label + ": " + std::to_string(value) + "/" +
-                       std::to_string(max_value);
+    std::string text =
+        label + ": " + std::to_string(value) + "/" + std::to_string(max_value);
     int text_width = MeasureText(text.c_str(), 16);
-    DrawText(text.c_str(), x + (width - text_width) / 2,
-             y + (height - 16) / 2, 16, WHITE);
+    DrawText(text.c_str(), x + (width - text_width) / 2, y + (height - 16) / 2,
+             16, WHITE);
 }
 
 int Render::draw_statuses(int panel_x, int y, Robot &robot)
@@ -279,8 +276,7 @@ int Render::draw_statuses(int panel_x, int y, Robot &robot)
     std::vector<std::string> labels = robot.get_status_labels();
     for (size_t i = 0; i < labels.size(); i++)
     {
-        DrawText(labels[i].c_str(), panel_x + 20, y + (int)i * 22, 16,
-                 ORANGE);
+        DrawText(labels[i].c_str(), panel_x + 20, y + (int)i * 22, 16, ORANGE);
     }
     return (int)labels.size() * 22;
 }
@@ -297,8 +293,8 @@ void Render::draw_cell_statuses(Cell &cell, int x, int y)
     {
         size = 10;
     }
-    DrawText(letters.c_str(), offset_x + x * draw_scale + 2,
-             y * draw_scale + 2, size, RED);
+    DrawText(letters.c_str(), offset_x + x * draw_scale + 2, y * draw_scale + 2,
+             size, RED);
 }
 
 void Render::draw_ap_text(World &world)
@@ -396,5 +392,3 @@ void Render::draw_level_up()
     DrawText("Heal", x1 + 95, y2 + 110, 25, WHITE);
     DrawText("Teleport", x2 + 70, y2 + 110, 25, WHITE);
 }
-
-
