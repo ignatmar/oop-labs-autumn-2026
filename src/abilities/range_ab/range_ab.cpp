@@ -5,7 +5,7 @@
 #include <cmath>
 
 Range_ab::Range_ab(int range, int damage, int cost)
-    : range(range), damage(damage), cost(cost), unlocked(false)
+    : range(range), damage(damage), cost(cost), level(0), unlocked(false)
 {
 }
 
@@ -51,6 +51,8 @@ void Range_ab::upgrade()
     level++;
     damage++;
 }
+
+int Range_ab::get_level() { return level; }
 
 bool Range_ab::is_unlocked() { return unlocked; }
 void Range_ab::unlock() { unlocked = true; }

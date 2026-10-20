@@ -14,8 +14,6 @@ void Render::draw(World &world, int game_over, int level_up,
     Robot &player = world.get_player_ref();
     std::vector<Robot *> &enemies = world.get_enemies_list();
 
-    toggle_fullscreen();
-
     int p_x = player.get_x();
     int p_y = player.get_y();
     int rad = player.get_vision();
@@ -130,10 +128,10 @@ void Render::draw(World &world, int game_over, int level_up,
     EndDrawing();
 }
 
-void Render::start(Map &map)
+void Render::init()
 {
-    InitWindow(map.get_width() * draw_scale + 200,
-               map.get_height() * draw_scale + 200, "Game");
+    InitWindow(1200, 1200, "Game");
+    SetExitKey(KEY_NULL);
 
     around_texture = LoadTexture("assets/ab/around.png");
     range_texture = LoadTexture("assets/ab/range.png");
@@ -148,6 +146,18 @@ void Render::start(Map &map)
     SetTargetFPS(60);
     ToggleFullscreen();
     center_window();
+}
+
+void Render::shutdown()
+{
+    UnloadTexture(around_texture);
+    UnloadTexture(range_texture);
+    UnloadTexture(heal_texture);
+    UnloadTexture(teleport_texture);
+    UnloadTexture(player_texture);
+    UnloadTexture(enemy_texture);
+    UnloadTexture(grass_texture);
+    CloseWindow();
 }
 
 void Render::center_window()
@@ -457,10 +467,18 @@ void Render::draw_game_over(int game_over)
     if (game_over == 1)
     {
         DrawText("VICTORY", width / 2 - 200, height / 2 - 60, 80, LIME);
+        DrawText("Press ENTER", width / 2 - 80, height / 2 + 50, 20, WHITE);
+    }
+    else if (game_over == 3)
+    {
+        DrawText("LEVEL COMPLETE", width / 2 - 300, height / 2 - 60, 60,
+                 LIME);
+        DrawText("Press ENTER", width / 2 - 80, height / 2 + 50, 20, WHITE);
     }
     else
     {
         DrawText("DEFEAT", width / 2 - 200, height / 2 - 60, 80, RED);
+        DrawText("Press ENTER", width / 2 - 80, height / 2 + 50, 20, WHITE);
     }
 }
 

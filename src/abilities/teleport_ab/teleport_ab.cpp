@@ -4,7 +4,7 @@
 #include <cstdlib>
 
 Teleport_ab::Teleport_ab(int range, int damage, int cost)
-    : range(range), damage(damage), cost(cost), unlocked(false)
+    : range(range), damage(damage), cost(cost), level(0), unlocked(false)
 {
 }
 
@@ -80,6 +80,8 @@ void Teleport_ab::upgrade()
     level++;
     cost--;
 }
+
+int Teleport_ab::get_level() { return level; }
 
 bool Teleport_ab::is_unlocked() { return unlocked; }
 

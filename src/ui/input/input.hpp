@@ -22,4 +22,7 @@ class Input
     static AbilityCmd get_ability(int draw_scale, int offset_x);
     static int get_item();
     static int get_view_mode();
+    static bool fullscreen_requested();
+    static bool menu_requested();
+    static bool confirm_requested();
 };

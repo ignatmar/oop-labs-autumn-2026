@@ -4,7 +4,7 @@
 #include "world/world.hpp"
 
 Heal_ab::Heal_ab(int range, int delta_hp, int cost)
-    : range(range), delta_hp(delta_hp), cost(cost), unlocked(false)
+    : range(range), delta_hp(delta_hp), cost(cost), level(0), unlocked(false)
 {
 }
 
@@ -41,6 +41,8 @@ void Heal_ab::upgrade()
     level++;
     delta_hp++;
 }
+
+int Heal_ab::get_level() { return level; }
 
 bool Heal_ab::is_unlocked() { return unlocked; }
 void Heal_ab::unlock() { unlocked = true; }

@@ -37,7 +37,8 @@ class Render
 
     void draw(World &world, int game_over, int level_up,
               std::vector<Ability *> abilities, ViewModeState &view_modes);
-    void start(Map &map);
+    void init();
+    void shutdown();
     void draw_ap_text(World &world);
     void draw_game_over(int game_over);
     void toggle_fullscreen();

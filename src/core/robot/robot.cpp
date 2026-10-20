@@ -27,6 +27,14 @@ Robot::Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max,
 {
 }
 
+Robot::~Robot()
+{
+    for (Status *status : statuses)
+    {
+        delete status;
+    }
+}
+
 void Robot::set_hp(int new_hp)
 {
     hp = normalize(new_hp, 0, hp_max);
@@ -78,6 +86,8 @@ int Robot::add_exp(int delta_exp)
 }
 
 int Robot::get_lvl() { return lvl; }
+
+void Robot::set_lvl(int new_lvl) { lvl = new_lvl; }
 
 void Robot::lvl_up()
 {
@@ -208,7 +218,22 @@ int Robot::get_mana() { return mana; }
 
 int Robot::get_max_mana() { return mana_max; }
 
+int Robot::get_exp() { return exp; }
+
+void Robot::set_exp(int new_exp) { exp = new_exp; }
+
+int Robot::get_speed() { return speed; }
+
 int Robot::get_max_exp() { return exp_max; };
+
+void Robot::clear_statuses()
+{
+    for (Status *status : statuses)
+    {
+        delete status;
+    }
+    statuses.clear();
+}
 
 void Robot::add_status(Status *status)
 {
@@ -363,6 +388,8 @@ int Robot::get_dmg()
     }
     return total;
 }
+
+int Robot::get_base_dmg() { return dmg; }
 
 void Robot::add_item(ItemType type, int count)
 {

@@ -1,3 +1,4 @@
-game
+/game
 *.o
 *.out
+save.txt

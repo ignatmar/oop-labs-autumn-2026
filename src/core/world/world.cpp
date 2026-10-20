@@ -4,9 +4,11 @@
 #include "item_use/item_use.hpp"
 #include "teleport_ab/teleport_ab.hpp"
 #include <cstdlib>
+#include <utility>
 
-World::World(Map &map)
-    : map(map), player(nullptr), steps(0), enemy_heal(nullptr), teleport(nullptr)
+World::World(Map map)
+    : map(std::move(map)), player(nullptr), steps(0), enemy_heal(nullptr),
+      teleport(nullptr)
 {
     enemy_heal = new Heal_ab(0, 0, 0);
     enemy_heal->unlock();
@@ -29,23 +31,26 @@ void World::set_player(Robot *robot)
     }
 }
 
-void World::add_enemy(Robot *robot)
+void World::add_enemy(std::unique_ptr<Robot> robot)
 {
     if (robot == nullptr)
     {
         return;
     }
-    enemies.push_back(robot);
-    map.get_cell(robot->get_x(), robot->get_y()).set_busy(true);
+    Robot *raw_robot = robot.get();
+    enemies.push_back(raw_robot);
+    owned_enemies.push_back(std::move(robot));
+    map.get_cell(raw_robot->get_x(), raw_robot->get_y()).set_busy(true);
 }
 
-void World::add_factory(Factory *factory)
+void World::add_factory(std::unique_ptr<Factory> factory)
 {
     if (factory == nullptr)
     {
         return;
     }
-    factories.push_back(factory);
+    factories.push_back(factory.get());
+    owned_factories.push_back(std::move(factory));
 }
 
 std::vector<Factory *> &World::get_factories()

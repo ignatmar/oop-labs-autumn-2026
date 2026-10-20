@@ -47,6 +47,9 @@ class Robot
   public:
     Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max, int team,
           int vision, bool visible);
+    ~Robot();
+    Robot(const Robot &other) = delete;
+    Robot &operator=(const Robot &other) = delete;
     void set_hp(int new_hp);
     void set_max_hp(int new_max_hp);
     void set_dmg(int new_dmg);
@@ -54,7 +57,10 @@ class Robot
     void set_max_mana(int new_max_mana);
     int add_exp(int delta_exp);
     int get_max_exp();
+    int get_exp();
+    void set_exp(int new_exp);
     int get_lvl();
+    void set_lvl(int new_lvl);
     void lvl_up();
     void upd_hp(int delta_hp);
     int interact(Robot &other, int damage);
@@ -76,6 +82,7 @@ class Robot
     int get_max_mana();
 
     void add_status(Status *status);
+    void clear_statuses();
     void update_statuses();
     std::vector<std::string> get_status_labels();
     void set_ability(int new_ability);
@@ -89,6 +96,8 @@ class Robot
     int get_shield();
 
     int get_dmg();
+    int get_base_dmg();
+    int get_speed();
 
     void add_item(ItemType type, int count);
     void use_item(ItemType type);

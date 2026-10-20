@@ -1,11 +1,6 @@
 #include "map/map.hpp"
-#include "burning/burning.hpp"
 #include "cell/cell.hpp"
-#include "overdrive/overdrive.hpp"
-#include "shield/shield.hpp"
-#include "slow/slow.hpp"
 #include <cstddef>
-#include <cstdlib>
 #include <vector>
 
 bool Map::check_coords(size_t x, size_t y)
@@ -51,95 +46,6 @@ Map::Map(size_t width, size_t height, std::vector<std::vector<char>> field)
             row.emplace_back(symbol);
         }
         this->field.push_back(std::move(row));
-    }
-
-    fill_statuses();
-    fill_items();
-}
-
-void Map::fill_items()
-{
-    for (size_t i = 0; i < height; i++)
-    {
-        for (size_t j = 0; j < width; j++)
-        {
-            Cell &cell = field[i][j];
-            if (!cell.can_walk())
-            {
-                continue;
-            }
-            int roll = std::rand() % 100;
-            int count = 0;
-            if (roll < 5)
-            {
-                count = 2;
-            }
-            else if (roll < 25)
-            {
-                count = 1;
-            }
-
-            if (count == 0)
-            {
-                continue;
-            }
-
-            ItemType first = (ItemType)(std::rand() % ITEM_COUNT);
-            cell.add_item(first);
-
-            if (count == 2)
-            {
-                ItemType second =
-                    (ItemType)((first + 1 + std::rand() % (ITEM_COUNT - 1)) %
-                               ITEM_COUNT);
-                cell.add_item(second);
-            }
-        }
-    }
-}
-
-void Map::fill_statuses()
-{
-    for (size_t i = 0; i < height; i++)
-    {
-        for (size_t j = 0; j < width; j++)
-        {
-            Cell &cell = field[i][j];
-            if (!cell.can_walk())
-            {
-                continue;
-            }
-            int roll = std::rand() % 100;
-            int count = 0;
-            if (roll < 5)
-            {
-                count = 2;
-            }
-            else if (roll < 25)
-            {
-                count = 1;
-            }
-
-            for (int k = 0; k < count; k++)
-            {
-                cell.add_status(create_status());
-            }
-        }
-    }
-}
-
-Status *Map::create_status()
-{
-    switch (std::rand() % 4)
-    {
-    case 0:
-        return new Slow();
-    case 1:
-        return new Overdrive();
-    case 2:
-        return new Burning(2, 5);
-    default:
-        return new Shield(20);
     }
 }
 

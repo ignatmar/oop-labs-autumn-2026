@@ -100,6 +100,21 @@ int Input::get_item()
     return -1;
 }
 
+bool Input::fullscreen_requested()
+{
+    return IsKeyPressed(KEY_F11);
+}
+
+bool Input::menu_requested()
+{
+    return IsKeyPressed(KEY_ESCAPE);
+}
+
+bool Input::confirm_requested()
+{
+    return IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_KP_ENTER);
+}
+
 int Input::get_view_mode()
 {
     if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))

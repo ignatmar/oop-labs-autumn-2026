@@ -20,6 +20,7 @@ class Teleport_ab : public Ability
     bool can_use(Robot &robot, World &world, size_t x, size_t y) override;
     int get_cost() override;
     void upgrade() override;
+    int get_level() override;
 
     bool is_unlocked() override;
     void unlock() override;

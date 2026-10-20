@@ -5,7 +5,7 @@
 #include <cmath>
 
 Around_ab::Around_ab(int radius, int damage, int cost)
-    : radius(radius), damage(damage), cost(cost), unlocked(false)
+    : radius(radius), damage(damage), cost(cost), level(0), unlocked(false)
 {
 }
 
@@ -51,6 +51,8 @@ void Around_ab::upgrade()
     level++;
     radius++;
 }
+
+int Around_ab::get_level() { return level; }
 
 bool Around_ab::is_unlocked() { return unlocked; }
 
