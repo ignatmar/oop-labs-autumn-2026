@@ -9,6 +9,7 @@ enum StatusType
     OVERDRIVE,
     BURNING,
     SHIELD,
+    ATTACK_BOOST,
     DMGBOOST,
     ITEM,
     ITEM_TAKE,

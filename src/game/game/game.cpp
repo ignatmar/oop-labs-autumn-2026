@@ -1,11 +1,10 @@
-#include "game.hpp"
+#include "game/game.hpp"
 #include "ability.hpp"
-#include "around_ab.hpp"
-#include "factory.hpp"
-#include "heal_ab.hpp"
-#include "input.hpp"
-#include "range_ab.hpp"
-#include "teleport_ab.hpp"
+#include "around_ab/around_ab.hpp"
+#include "heal_ab/heal_ab.hpp"
+#include "input/input.hpp"
+#include "range_ab/range_ab.hpp"
+#include "teleport_ab/teleport_ab.hpp"
 #include <raylib.h>
 
 Game::Game(World &world)
@@ -20,6 +19,12 @@ Game::Game(World &world)
 
 void Game::player_turn(Render &render)
 {
+    int item = Input::get_item();
+    if (item >= 0)
+    {
+        world.player_use_item((ItemType)item);
+    }
+
     Input::AbilityCmd cmd =
         Input::get_ability(render.get_draw_scale(), render.get_offset_x());
     if (cmd.used && world.player_try_use_ability())

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ability.hpp"
-#include "render.hpp"
-#include "world.hpp"
+#include "render/render.hpp"
+#include "world/world.hpp"
 
 enum GAME_STATUS
 {

@@ -1,7 +1,7 @@
-#include "cell.hpp"
+#include "cell/cell.hpp"
 #include "status.hpp"
 
-Cell::Cell(char sym) : visible(false), has_item(false), has_robot(false)
+Cell::Cell(char sym) : visible(false), has_robot(false), items{}
 {
     switch (sym)
     {
@@ -28,9 +28,14 @@ Cell::~Cell()
 }
 
 Cell::Cell(Cell &&other)
-    : surface(other.surface), visible(other.visible), has_item(other.has_item),
+    : surface(other.surface), visible(other.visible),
       has_robot(other.has_robot), statuses(other.statuses)
 {
+    for (int i = 0; i < ITEM_COUNT; i++)
+    {
+        items[i] = other.items[i];
+        other.items[i] = 0;
+    }
     other.statuses.clear();
 }
 
@@ -46,8 +51,12 @@ Cell &Cell::operator=(Cell &&other)
     }
     surface = other.surface;
     visible = other.visible;
-    has_item = other.has_item;
     has_robot = other.has_robot;
+    for (int i = 0; i < ITEM_COUNT; i++)
+    {
+        items[i] = other.items[i];
+        other.items[i] = 0;
+    }
     statuses = other.statuses;
     other.statuses.clear();
     return *this;
@@ -61,7 +70,22 @@ bool Cell::if_visible() { return visible; }
 
 void Cell::make_visible() { visible = true; }
 
-void Cell::set_surface(int value) { surface = value; }
+void Cell::set_surface(int value)
+{
+    surface = value;
+    if (!can_walk())
+    {
+        for (int i = 0; i < ITEM_COUNT; i++)
+        {
+            items[i] = 0;
+        }
+        for (Status *status : statuses)
+        {
+            delete status;
+        }
+        statuses.clear();
+    }
+}
 
 bool Cell::if_busy() { return has_robot; }
 
@@ -108,4 +132,41 @@ std::string Cell::get_status_letters()
         }
     }
     return letters;
+}
+
+void Cell::add_item(ItemType type)
+{
+    if (type >= 0 && type < ITEM_COUNT)
+    {
+        items[type] = 1;
+    }
+}
+
+int Cell::get_item_count(ItemType type)
+{
+    if (type < 0 || type >= ITEM_COUNT)
+    {
+        return 0;
+    }
+    return items[type];
+}
+
+void Cell::take_item(ItemType type)
+{
+    if (type >= 0 && type < ITEM_COUNT)
+    {
+        items[type] = 0;
+    }
+}
+
+bool Cell::has_items()
+{
+    for (int i = 0; i < ITEM_COUNT; i++)
+    {
+        if (items[i] > 0)
+        {
+            return true;
+        }
+    }
+    return false;
 }

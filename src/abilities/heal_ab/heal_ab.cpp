@@ -1,7 +1,7 @@
-#include "heal_ab.hpp"
-#include "robot.hpp"
-#include "shield.hpp"
-#include "world.hpp"
+#include "heal_ab/heal_ab.hpp"
+#include "robot/robot.hpp"
+#include "shield/shield.hpp"
+#include "world/world.hpp"
 
 Heal_ab::Heal_ab(int range, int delta_hp, int cost)
     : range(range), delta_hp(delta_hp), cost(cost), unlocked(false)

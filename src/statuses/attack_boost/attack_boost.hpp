@@ -1,0 +1,23 @@
+#pragma once
+#include "status.hpp"
+#include <string>
+
+class AttackBoost : public Status
+{
+  private:
+    int bonus;
+    int turns;
+
+  public:
+    AttackBoost(int bonus);
+    void apply(Robot &robot) override;
+    void update(Robot &robot) override;
+    bool is_active() override;
+    void combine(Status *status) override;
+    StatusType get_type() override;
+    std::string get_label() override;
+    char get_symbol() override;
+    Status *clone() override;
+
+    int get_bonus();
+};

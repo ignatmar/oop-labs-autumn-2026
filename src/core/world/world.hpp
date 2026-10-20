@@ -1,7 +1,8 @@
 #pragma once
-#include "factory.hpp"
-#include "map.hpp"
-#include "robot.hpp"
+#include "factory/factory.hpp"
+#include "item/item.hpp"
+#include "map/map.hpp"
+#include "robot/robot.hpp"
 #include <vector>
 
 class Ability;
@@ -56,6 +57,8 @@ class World
     bool check_coords(size_t x, size_t y);
     Cell &get_cell(int x, int y);
     void apply_cell_statuses(Robot &robot, int x, int y);
+    void apply_cell_items(Robot &robot, int x, int y);
+    void player_use_item(ItemType type);
     void set_factory(size_t x, size_t y);
     void process_enemy_turns(double &timer);
     void start_enemy_turn();

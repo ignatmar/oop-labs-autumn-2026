@@ -1,0 +1,6 @@
+-std=c++17
+-Isrc/core
+-Isrc/statuses
+-Isrc/abilities
+-Isrc/ui
+-Isrc/game

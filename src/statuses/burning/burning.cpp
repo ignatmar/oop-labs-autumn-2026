@@ -1,5 +1,5 @@
-#include "burning.hpp"
-#include "robot.hpp"
+#include "burning/burning.hpp"
+#include "robot/robot.hpp"
 
 Burning::Burning(int turns, int damage) : turns(turns), damage(damage) {}
 

@@ -1,5 +1,4 @@
-#include "slow.hpp"
-#include "robot.hpp"
+#include "slow/slow.hpp"
 
 Slow::Slow() : turns(1), fresh(true) {}
 

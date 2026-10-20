@@ -1,7 +1,7 @@
-#include "around_ab.hpp"
-#include "overdrive.hpp"
-#include "robot.hpp"
-#include "world.hpp"
+#include "around_ab/around_ab.hpp"
+#include "overdrive/overdrive.hpp"
+#include "robot/robot.hpp"
+#include "world/world.hpp"
 #include <cmath>
 
 Around_ab::Around_ab(int radius, int damage, int cost)
@@ -26,7 +26,7 @@ void Around_ab::use(Robot &robot, World &world, size_t, size_t)
         }
         if (std::pow(enemy->get_x() - xx, 2) +
                 std::pow(enemy->get_y() - yy, 2) <=
-            pow(radius, 2))
+            std::pow(radius, 2))
         {
             world.move_robot(&robot, enemy->get_x(), enemy->get_y(), damage, 0);
             enemy->add_status(new Overdrive());

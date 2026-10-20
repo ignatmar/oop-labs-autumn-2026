@@ -1,6 +1,7 @@
-#include "teleport_ab.hpp"
-#include "robot.hpp"
-#include "world.hpp"
+#include "teleport_ab/teleport_ab.hpp"
+#include "robot/robot.hpp"
+#include "world/world.hpp"
+#include <cstdlib>
 
 Teleport_ab::Teleport_ab(int range, int damage, int cost)
     : range(range), damage(damage), cost(cost), unlocked(false)
@@ -16,6 +17,7 @@ void Teleport_ab::use(Robot &robot, World &world, size_t x, size_t y)
     robot.teleport_to(world, (int)x, (int)y);
     robot.set_mana(robot.get_mana() - cost);
     world.apply_cell_statuses(robot, (int)x, (int)y);
+    world.apply_cell_items(robot, (int)x, (int)y);
 }
 
 bool Teleport_ab::can_use(Robot &robot, World &world, size_t x, size_t y)

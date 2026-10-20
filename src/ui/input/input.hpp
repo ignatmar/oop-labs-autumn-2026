@@ -20,4 +20,5 @@ class Input
     static int get_level_up_choice();
     static MoveCmd get_move();
     static AbilityCmd get_ability(int draw_scale, int offset_x);
+    static int get_item();
 };

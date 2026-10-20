@@ -1,6 +1,6 @@
-#include "factory.hpp"
-#include "robot.hpp"
-#include "world.hpp"
+#include "factory/factory.hpp"
+#include "robot/robot.hpp"
+#include "world/world.hpp"
 
 Factory::Factory(int x, int y, int freq) : x(x), y(y), freq(freq) {}
 

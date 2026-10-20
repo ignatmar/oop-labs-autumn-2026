@@ -1,6 +1,8 @@
-#include "world.hpp"
-#include "heal_ab.hpp"
-#include "teleport_ab.hpp"
+#include "world/world.hpp"
+#include "heal_ab/heal_ab.hpp"
+#include "item_take/item_take.hpp"
+#include "item_use/item_use.hpp"
+#include "teleport_ab/teleport_ab.hpp"
 #include <cstdlib>
 
 World::World(Map &map)
@@ -107,6 +109,7 @@ int World::move_robot(Robot *robot, int new_x, int new_y, int damage, int action
                 robot->set_coords(new_x, new_y);
                 robot->set_ap(robot->get_ap() - new_cell.get_surface());
                 apply_cell_statuses(*robot, new_x, new_y);
+                apply_cell_items(*robot, new_x, new_y);
             }
         }
     }
@@ -141,6 +144,42 @@ void World::apply_cell_statuses(Robot &robot, int x, int y)
     }
     Status *removed_status = cell.take_status(removed);
     delete removed_status;
+}
+
+void World::apply_cell_items(Robot &robot, int x, int y)
+{
+    if (!check_coords((size_t)x, (size_t)y))
+    {
+        return;
+    }
+    if (player == nullptr || &robot != player)
+    {
+        return;
+    }
+    Cell &cell = map.get_cell(x, y);
+    for (int i = 0; i < ITEM_COUNT; i++)
+    {
+        ItemType type = (ItemType)i;
+        int count = cell.get_item_count(type);
+        if (count > 0)
+        {
+            robot.add_status(new ItemTake(type, count));
+            cell.take_item(type);
+        }
+    }
+}
+
+void World::player_use_item(ItemType type)
+{
+    if (player == nullptr)
+    {
+        return;
+    }
+    if (player->get_item_count(type) <= 0)
+    {
+        return;
+    }
+    player->add_status(new ItemUse(type));
 }
 
 int World::move_player(int dx, int dy, int action_points)

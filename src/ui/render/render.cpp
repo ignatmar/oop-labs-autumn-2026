@@ -1,14 +1,14 @@
-#include "render.hpp"
-#include "cell.hpp"
-#include "robot.hpp"
+#include "render/render.hpp"
+#include "cell/cell.hpp"
+#include "robot/robot.hpp"
 #include <cstdlib>
 #include <raylib.h>
 #include <string>
 
 Render::Render(int draw_scale)
+    : draw_scale(draw_scale), offset_x(0), highlight_enemies(false),
+      highlight_impassable(false), highlight_statuses(false)
 {
-    this->draw_scale = draw_scale;
-    this->offset_x = 0;
 }
 
 void Render::draw(World &world, int game_over, int level_up,
@@ -69,7 +69,9 @@ void Render::draw(World &world, int game_over, int level_up,
             {
                 DrawRectangle(offset_x + x * draw_scale, y * draw_scale,
                               draw_scale, draw_scale, cell_color);
+                draw_cell_highlights(cell, x, y);
                 draw_cell_statuses(cell, x, y);
+                draw_cell_items(cell, x, y);
             }
             else
             {
@@ -110,11 +112,16 @@ void Render::draw(World &world, int game_over, int level_up,
                  (float)(e_y * draw_scale), (float)draw_scale,
                  (float)draw_scale},
                 {0, 0}, 0, WHITE);
+            if (highlight_enemies)
+            {
+                DrawRectangle(offset_x + e_x * draw_scale, e_y * draw_scale,
+                              draw_scale, draw_scale, Fade(RED, 0.4f));
+            }
         }
     }
 
     draw_ap_text(world);
-    draw_abilities(map, abilities);
+    draw_abilities(world, abilities);
     draw_player_bars(world);
     if (game_over)
     {
@@ -164,8 +171,10 @@ void Render::toggle_fullscreen()
     }
 }
 
-void Render::draw_abilities(Map &map, std::vector<Ability *> abilities)
+void Render::draw_abilities(World &world, std::vector<Ability *> abilities)
 {
+    Map &map = world.get_map();
+    Robot &player = world.get_player_ref();
     int panel_y = map.get_height() * draw_scale;
     int panel_height = 200;
 
@@ -197,6 +206,105 @@ void Render::draw_abilities(Map &map, std::vector<Ability *> abilities)
         int text_x = x + (square_size - text_width) / 2;
 
         DrawText(names[i], text_x, panel_y + 90, 16, WHITE);
+    }
+
+    int item_total = square_size * ITEM_COUNT + spacing * (ITEM_COUNT - 1);
+    int item_start_x = start_x - item_total - 50;
+
+    const char *item_names[] = {"Health", "Mana", "Attack"};
+    Color item_colors[] = {RED, BLUE, ORANGE};
+
+    for (int i = 0; i < ITEM_COUNT; i++)
+    {
+        int x = item_start_x + i * (square_size + spacing);
+        int center_x = x + square_size / 2;
+
+        DrawRectangleLines(x, panel_y + 10, square_size, square_size, WHITE);
+        DrawCircle(center_x, panel_y + 34, 18, item_colors[i]);
+
+        std::string count =
+            "x" + std::to_string(player.get_item_count((ItemType)i));
+        int count_width = MeasureText(count.c_str(), 16);
+        DrawText(count.c_str(), center_x - count_width / 2, panel_y + 56, 16,
+                 WHITE);
+
+        int name_width = MeasureText(item_names[i], 16);
+        DrawText(item_names[i], center_x - name_width / 2, panel_y + 90, 16,
+                 WHITE);
+    }
+
+    int mode_start_x = start_x + total_width + 50;
+    draw_view_modes(panel_y, mode_start_x);
+}
+
+void Render::draw_view_modes(int panel_y, int start_x)
+{
+    const char *names[] = {"Standard", "Enemies", "Impassable", "Statuses"};
+    Color colors[] = {DARKGRAY, Fade(RED, 0.6f), Fade(ORANGE, 0.6f),
+                      Fade(SKYBLUE, 0.6f)};
+
+    int button_width = 120;
+    int button_height = 38;
+    int spacing = 10;
+
+    Rectangle buttons[4];
+    for (int i = 0; i < 4; i++)
+    {
+        int column = i % 2;
+        int row = i / 2;
+        buttons[i] = {
+            (float)(start_x + column * (button_width + spacing)),
+            (float)(panel_y + 10 + row * (button_height + spacing)),
+            (float)button_width, (float)button_height};
+    }
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        Vector2 mouse = GetMousePosition();
+        for (int i = 0; i < 4; i++)
+        {
+            if (!CheckCollisionPointRec(mouse, buttons[i]))
+            {
+                continue;
+            }
+
+            if (i == 0)
+            {
+                highlight_enemies = false;
+                highlight_impassable = false;
+                highlight_statuses = false;
+            }
+            else if (i == 1)
+            {
+                highlight_enemies = !highlight_enemies;
+            }
+            else if (i == 2)
+            {
+                highlight_impassable = !highlight_impassable;
+            }
+            else
+            {
+                highlight_statuses = !highlight_statuses;
+            }
+            break;
+        }
+    }
+
+    bool active[] = {!highlight_enemies && !highlight_impassable &&
+                         !highlight_statuses,
+                     highlight_enemies, highlight_impassable,
+                     highlight_statuses};
+
+    for (int i = 0; i < 4; i++)
+    {
+        DrawRectangleRec(buttons[i], active[i] ? colors[i] : BLACK);
+        DrawRectangleLinesEx(buttons[i], active[i] ? 2.0f : 1.0f,
+                             active[i] ? WHITE : GRAY);
+
+        int text_width = MeasureText(names[i], 16);
+        DrawText(names[i],
+                 (int)(buttons[i].x + (button_width - text_width) / 2),
+                 (int)(buttons[i].y + (button_height - 16) / 2), 16, WHITE);
     }
 }
 
@@ -295,6 +403,54 @@ void Render::draw_cell_statuses(Cell &cell, int x, int y)
     }
     DrawText(letters.c_str(), offset_x + x * draw_scale + 2, y * draw_scale + 2,
              size, RED);
+}
+
+void Render::draw_cell_items(Cell &cell, int x, int y)
+{
+    if (!cell.has_items())
+    {
+        return;
+    }
+    Color colors[] = {RED, BLUE, ORANGE};
+    int radius = draw_scale / 8;
+    if (radius < 3)
+    {
+        radius = 3;
+    }
+
+    int cell_x = offset_x + x * draw_scale;
+    int margin = radius + 2;
+    int center_y = y * draw_scale + draw_scale - radius - 3;
+
+    int positions[ITEM_COUNT];
+    positions[ITEM_HEALTH] = cell_x + draw_scale - margin;
+    positions[ITEM_MANA] = cell_x + margin;
+    positions[ITEM_ATTACK] = cell_x + draw_scale / 2;
+
+    for (int i = 0; i < ITEM_COUNT; i++)
+    {
+        if (cell.get_item_count((ItemType)i) > 0)
+        {
+            DrawCircle(positions[i], center_y, radius, colors[i]);
+        }
+    }
+}
+
+void Render::draw_cell_highlights(Cell &cell, int x, int y)
+{
+    int pixel_x = offset_x + x * draw_scale;
+    int pixel_y = y * draw_scale;
+
+    if (highlight_impassable && !cell.can_walk())
+    {
+        DrawRectangle(pixel_x, pixel_y, draw_scale, draw_scale,
+                      Fade(ORANGE, 0.45f));
+    }
+    if (highlight_statuses && cell.get_status_count() > 0)
+    {
+        DrawRectangle(pixel_x, pixel_y, draw_scale, draw_scale,
+                      Fade(SKYBLUE, 0.45f));
+    }
 }
 
 void Render::draw_ap_text(World &world)

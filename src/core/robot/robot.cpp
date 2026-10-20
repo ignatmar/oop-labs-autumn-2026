@@ -1,8 +1,10 @@
-#include "robot.hpp"
-#include "map.hpp"
-#include "shield.hpp"
-#include "slow.hpp"
-#include "world.hpp"
+#include "robot/robot.hpp"
+#include "attack_boost/attack_boost.hpp"
+#include "map/map.hpp"
+#include "shield/shield.hpp"
+#include "slow/slow.hpp"
+#include "world/world.hpp"
+#include <raylib.h>
 int Robot::normalize(int x, int min_x, int max_x)
 {
     if (x < min_x)
@@ -21,8 +23,7 @@ Robot::Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max,
     : hp(hp_max), hp_max(hp_max), dmg(dmg), mana(mana_max), mana_max(mana_max),
       exp(0), exp_max(exp_max), lvl(0), x(0), y(0), team(team), ap(speed * 2),
       ap_max(speed * 2), kills(0), speed(speed), vision(vision),
-      visible(visible), alive(true), ability(ABILITY_NONE), health_items(0),
-      mana_items(0), damage_items(0)
+      visible(visible), alive(true), ability(ABILITY_NONE), items{}
 {
 }
 
@@ -211,13 +212,22 @@ int Robot::get_max_exp() { return exp_max; };
 
 void Robot::add_status(Status *status)
 {
-    for (Status *current : statuses)
+    if (status == nullptr)
     {
-        if (current->get_type() == status->get_type())
+        return;
+    }
+    status->apply(*this);
+
+    if (status->get_type() != ITEM_TAKE && status->get_type() != ITEM_USE)
+    {
+        for (Status *current : statuses)
         {
-            current->combine(status);
-            delete status;
-            return;
+            if (current->get_type() == status->get_type())
+            {
+                current->combine(status);
+                delete status;
+                return;
+            }
         }
     }
 
@@ -341,30 +351,66 @@ int Robot::get_shield()
     return 0;
 }
 
-int Robot::get_dmg() { return dmg; }
-
-void Robot::add_item(int count)
+int Robot::get_dmg()
 {
-    health_items += count;
-    mana_items += count;
-    damage_items += count;
+    int total = dmg;
+    for (Status *status : statuses)
+    {
+        if (status->get_type() == ATTACK_BOOST)
+        {
+            total += ((AttackBoost *)status)->get_bonus();
+        }
+    }
+    return total;
 }
 
-void Robot::use_item()
+void Robot::add_item(ItemType type, int count)
 {
-    if (health_items <= 0)
+    if (type >= 0 && type < ITEM_COUNT)
+    {
+        items[type] += count;
+    }
+}
+
+void Robot::use_item(ItemType type)
+{
+    if (type < 0 || type >= ITEM_COUNT || items[type] <= 0)
     {
         return;
     }
-    health_items--;
-    mana_items--;
-    damage_items--;
-    upd_hp(50);
-    set_mana(mana + 50);
-    set_dmg(dmg + 5);
+    items[type]--;
+    if (type == ITEM_HEALTH)
+    {
+        upd_hp(50);
+    }
+    else if (type == ITEM_MANA)
+    {
+        set_mana(mana + 50);
+    }
+    else if (type == ITEM_ATTACK)
+    {
+        add_status(new AttackBoost(10));
+    }
 }
 
-int Robot::get_items() { return health_items + mana_items + damage_items; }
+int Robot::get_item_count(ItemType type)
+{
+    if (type < 0 || type >= ITEM_COUNT)
+    {
+        return 0;
+    }
+    return items[type];
+}
+
+int Robot::get_items()
+{
+    int total = 0;
+    for (int i = 0; i < ITEM_COUNT; i++)
+    {
+        total += items[i];
+    }
+    return total;
+}
 
 void Robot::make_dead() { alive = false; }
 

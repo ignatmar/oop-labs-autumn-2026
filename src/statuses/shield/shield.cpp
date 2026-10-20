@@ -1,5 +1,4 @@
-#include "shield.hpp"
-#include "robot.hpp"
+#include "shield/shield.hpp"
 
 Shield::Shield(int damage) : turns(0), damage(damage) {}
 

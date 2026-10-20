@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cell.hpp"
+#include "cell/cell.hpp"
 #include <vector>
 #define MAX_MAP_SIZE 100
 #define MIN_MAP_SIZE 25
@@ -15,6 +15,7 @@ class Map
     std::vector<std::vector<Cell>> field;
 
     void fill_statuses();
+    void fill_items();
     Status *create_status();
 
   public:

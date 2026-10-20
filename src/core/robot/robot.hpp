@@ -1,7 +1,7 @@
 #pragma once
-#include "cell.hpp"
+#include "item/item.hpp"
 #include "status.hpp"
-#include <cstdlib>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -42,9 +42,7 @@ class Robot
 
     std::vector<Status *> statuses;
 
-    int health_items;
-    int mana_items;
-    int damage_items;
+    int items[ITEM_COUNT];
 
   public:
     Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max, int team,
@@ -92,8 +90,9 @@ class Robot
 
     int get_dmg();
 
-    void add_item(int count);
-    void use_item();
+    void add_item(ItemType type, int count);
+    void use_item(ItemType type);
+    int get_item_count(ItemType type);
     int get_items();
 
     void make_dead();

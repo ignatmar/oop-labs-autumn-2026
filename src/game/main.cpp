@@ -1,9 +1,9 @@
-#include "factory.hpp"
-#include "game.hpp"
-#include "map.hpp"
-#include "render.hpp"
-#include "robot.hpp"
-#include "world.hpp"
+#include "factory/factory.hpp"
+#include "game/game.hpp"
+#include "map/map.hpp"
+#include "render/render.hpp"
+#include "robot/robot.hpp"
+#include "world/world.hpp"
 #include <cstdlib>
 #include <ctime>
 int main()

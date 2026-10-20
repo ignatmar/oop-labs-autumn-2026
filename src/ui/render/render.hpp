@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ability.hpp"
-#include "map.hpp"
-#include "world.hpp"
+#include "map/map.hpp"
+#include "world/world.hpp"
 #include <raylib.h>
 
 class Render
@@ -11,8 +11,15 @@ class Render
     int draw_scale;
     int offset_x;
 
+    bool highlight_enemies;
+    bool highlight_impassable;
+    bool highlight_statuses;
+
     int draw_statuses(int panel_x, int y, Robot &robot);
     void draw_cell_statuses(Cell &cell, int x, int y);
+    void draw_cell_items(Cell &cell, int x, int y);
+    void draw_cell_highlights(Cell &cell, int x, int y);
+    void draw_view_modes(int panel_y, int start_x);
     void draw_player_bars(World &world);
     void draw_bar(int x, int y, int width, int height, int value, int max_value,
                   Color color, std::string label);
@@ -38,7 +45,7 @@ class Render
     void toggle_fullscreen();
     void center_window();
 
-    void draw_abilities(Map &map, std::vector<Ability *> abilities);
+    void draw_abilities(World &world, std::vector<Ability *> abilities);
 
     void draw_level_up();
 

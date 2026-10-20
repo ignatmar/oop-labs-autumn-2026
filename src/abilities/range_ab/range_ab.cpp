@@ -1,7 +1,7 @@
-#include "range_ab.hpp"
-#include "burning.hpp"
-#include "robot.hpp"
-#include "world.hpp"
+#include "range_ab/range_ab.hpp"
+#include "burning/burning.hpp"
+#include "robot/robot.hpp"
+#include "world/world.hpp"
 #include <cmath>
 
 Range_ab::Range_ab(int range, int damage, int cost)

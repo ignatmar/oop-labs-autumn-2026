@@ -1,4 +1,4 @@
-#include "input.hpp"
+#include "input/input.hpp"
 #include <raylib.h>
 
 Input::MoveCmd Input::get_move()
@@ -80,6 +80,23 @@ Input::AbilityCmd Input::get_ability(int draw_scale, int offset_x)
     }
 
     return cmd;
+}
+
+int Input::get_item()
+{
+    if (IsKeyPressed(KEY_FIVE))
+    {
+        return 0;
+    }
+    if (IsKeyPressed(KEY_SIX))
+    {
+        return 1;
+    }
+    if (IsKeyPressed(KEY_SEVEN))
+    {
+        return 2;
+    }
+    return -1;
 }
 
 int Input::get_level_up_choice()

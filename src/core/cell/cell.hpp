@@ -1,5 +1,5 @@
 #pragma once
-#include <raylib.h>
+#include "item/item.hpp"
 #include <string>
 #include <vector>
 
@@ -20,8 +20,9 @@ class Cell
   private:
     int surface;
     bool visible;
-    bool has_item;
     bool has_robot;
+
+    int items[ITEM_COUNT];
 
     std::vector<Status *> statuses;
 
@@ -46,4 +47,9 @@ class Cell
     Status *take_status(int index);
     int get_status_count();
     std::string get_status_letters();
+
+    void add_item(ItemType type);
+    int get_item_count(ItemType type);
+    void take_item(ItemType type);
+    bool has_items();
 };
