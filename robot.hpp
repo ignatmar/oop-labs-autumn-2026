@@ -2,7 +2,17 @@
 #include "cell.hpp"
 #include "status.hpp"
 #include <cstdlib>
+#include <string>
 #include <vector>
+
+class World;
+
+enum EnemyAbility
+{
+    ABILITY_NONE = 0,
+    ABILITY_HEAL = 1,
+    ABILITY_TELEPORT = 2
+};
 
 class Robot
 {
@@ -25,6 +35,8 @@ class Robot
     bool visible;
 
     bool alive;
+
+    int ability;
 
     int normalize(int x, int min_x, int max_x);
 
@@ -49,6 +61,7 @@ class Robot
     void upd_hp(int delta_hp);
     int interact(Robot &other, int damage);
     void set_coords(int x, int y);
+    void teleport_to(World &world, int new_x, int new_y);
     int get_x();
     int get_y();
     int get_team();
@@ -66,11 +79,22 @@ class Robot
 
     void add_status(Status *status);
     void update_statuses();
+    std::vector<std::string> get_status_labels();
+    void set_ability(int new_ability);
+    int get_ability();
+    void clear_ability();
+    bool try_use_ability();
     bool can_move();
-    bool can_use_ability();
+    bool is_slowed();
+    void consume_slow();
+    void ready_slow();
     int get_shield();
 
     int get_dmg();
+
+    void add_item(int count);
+    void use_item();
+    int get_items();
 
     void make_dead();
     bool if_alive();

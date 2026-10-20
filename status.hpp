@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 class Robot;
 
@@ -9,7 +10,9 @@ enum StatusType
     BURNING,
     SHIELD,
     DMGBOOST,
-    ITEM
+    ITEM,
+    ITEM_TAKE,
+    ITEM_USE
 };
 
 class Status
@@ -21,4 +24,7 @@ class Status
     virtual bool is_active() = 0;
     virtual StatusType get_type() = 0;
     virtual void combine(Status *status) = 0;
+    virtual std::string get_label() = 0;
+    virtual char get_symbol() = 0;
+    virtual Status *clone() = 0;
 };

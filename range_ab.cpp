@@ -5,7 +5,7 @@
 #include <cmath>
 
 Range_ab::Range_ab(int range, int damage, int cost)
-    : range(range), damage(damage), cost(cost)
+    : range(range), damage(damage), cost(cost), unlocked(false)
 {
 }
 

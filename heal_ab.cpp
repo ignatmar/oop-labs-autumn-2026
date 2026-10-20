@@ -4,7 +4,7 @@
 #include "world.hpp"
 
 Heal_ab::Heal_ab(int range, int delta_hp, int cost)
-    : range(range), delta_hp(delta_hp), cost(cost)
+    : range(range), delta_hp(delta_hp), cost(cost), unlocked(false)
 {
 }
 

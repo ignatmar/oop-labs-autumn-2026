@@ -12,4 +12,7 @@ class Ability
     virtual void upgrade() = 0;
     virtual bool is_unlocked() = 0;
     virtual void unlock() = 0;
+    virtual ~Ability()
+    {
+    }
 };

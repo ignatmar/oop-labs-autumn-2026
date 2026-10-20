@@ -1,9 +1,21 @@
 #include "world.hpp"
+#include "heal_ab.hpp"
+#include "teleport_ab.hpp"
 #include <cstdlib>
 
 World::World(Map &map)
-    : map(map), player(nullptr), steps(0)
+    : map(map), player(nullptr), steps(0), enemy_heal(nullptr), teleport(nullptr)
 {
+    enemy_heal = new Heal_ab(0, 0, 0);
+    enemy_heal->unlock();
+    teleport = new Teleport_ab(5, 0, 0);
+    teleport->unlock();
+}
+
+World::~World()
+{
+    delete enemy_heal;
+    delete teleport;
 }
 
 void World::set_player(Robot *robot)
@@ -46,13 +58,14 @@ Map &World::get_map()
 
 Robot *World::find_robot(int x, int y)
 {
-    if (player != nullptr && player->get_x() == x && player->get_y() == y)
+    if (player != nullptr && player->if_alive() && player->get_x() == x &&
+        player->get_y() == y)
     {
         return player;
     }
     for (Robot *enemy : enemies)
     {
-        if (enemy == nullptr)
+        if (enemy == nullptr || !enemy->if_alive())
         {
             continue;
         }
@@ -89,14 +102,45 @@ int World::move_robot(Robot *robot, int new_x, int new_y, int damage, int action
             }
             else
             {
-                map.get_cell(robot->get_y(), robot->get_x()).set_busy(false);
+                map.get_cell(robot->get_x(), robot->get_y()).set_busy(false);
                 new_cell.set_busy(true);
                 robot->set_coords(new_x, new_y);
                 robot->set_ap(robot->get_ap() - new_cell.get_surface());
+                apply_cell_statuses(*robot, new_x, new_y);
             }
         }
     }
     return 0;
+}
+
+void World::apply_cell_statuses(Robot &robot, int x, int y)
+{
+    if (!check_coords((size_t)x, (size_t)y))
+    {
+        return;
+    }
+    Cell &cell = map.get_cell(x, y);
+    int count = cell.get_status_count();
+    if (count == 0)
+    {
+        return;
+    }
+    int removed = std::rand() % count;
+    for (int i = 0; i < count; i++)
+    {
+        Status *status = cell.get_status(i);
+        if (status == nullptr)
+        {
+            continue;
+        }
+        Status *copy = status->clone();
+        if (copy != nullptr)
+        {
+            robot.add_status(copy);
+        }
+    }
+    Status *removed_status = cell.take_status(removed);
+    delete removed_status;
 }
 
 int World::move_player(int dx, int dy, int action_points)
@@ -174,14 +218,41 @@ void World::player_update_statuses()
     }
 }
 
-bool World::player_can_use_ability()
+void World::player_ready_slow()
 {
-    return player != nullptr && player->can_use_ability();
+    if (player != nullptr)
+    {
+        player->ready_slow();
+    }
 }
 
-int World::get_player_dmg()
+void World::enemies_ready_slow()
 {
-    return player != nullptr ? player->get_dmg() : 0;
+    for (Robot *enemy : enemies)
+    {
+        if (enemy != nullptr && enemy->get_hp() > 0)
+        {
+            enemy->ready_slow();
+        }
+    }
+}
+
+bool World::player_try_use_ability()
+{
+    return player != nullptr && player->try_use_ability();
+}
+
+bool World::player_is_slowed()
+{
+    return player != nullptr && player->is_slowed();
+}
+
+void World::player_consume_slow()
+{
+    if (player != nullptr)
+    {
+        player->consume_slow();
+    }
 }
 
 void World::refill_ap()
@@ -227,10 +298,24 @@ void World::process_enemy_turns(double &timer)
         {
             continue;
         }
+        if (enemy->is_slowed())
+        {
+            enemy->consume_slow();
+            enemy->set_ap(0);
+            timer = 0;
+            break;
+        }
+        if (enemy->get_ability() != ABILITY_NONE)
+        {
+            enemy_use_ability(enemy);
+            timer = 0;
+            break;
+        }
         int e_x = enemy->get_x();
         int e_y = enemy->get_y();
         int p_x = player != nullptr ? player->get_x() : e_x;
         int p_y = player != nullptr ? player->get_y() : e_y;
+        int ap_before = enemy->get_ap();
         bool moved = false;
         if (e_x < p_x)
         {
@@ -251,10 +336,77 @@ void World::process_enemy_turns(double &timer)
         {
             move_robot(enemy, e_x, e_y - 1, enemy->get_dmg(), 3);
         }
-        enemy->update_statuses();
+        if (enemy->get_ap() == ap_before)
+        {
+            enemy->set_ap(0);
+        }
         timer = 0;
         break;
     }
+}
+
+void World::enemies_update_statuses()
+{
+    for (Robot *enemy : enemies)
+    {
+        if (enemy != nullptr && enemy->get_hp() > 0)
+        {
+            enemy->update_statuses();
+        }
+    }
+}
+
+void World::start_enemy_turn()
+{
+    for (Robot *enemy : enemies)
+    {
+        if (enemy == nullptr || enemy->get_hp() <= 0)
+        {
+            continue;
+        }
+        if (std::rand() % 2 == 0)
+        {
+            enemy->set_ability(ABILITY_HEAL);
+        }
+        else
+        {
+            enemy->set_ability(ABILITY_TELEPORT);
+        }
+    }
+}
+
+void World::enemy_use_ability(Robot *enemy)
+{
+    if (enemy == nullptr || enemy->get_ability() == ABILITY_NONE)
+    {
+        return;
+    }
+    if (!enemy->try_use_ability())
+    {
+        enemy->clear_ability();
+        return;
+    }
+    Ability *ability = nullptr;
+    size_t x = 0;
+    size_t y = 0;
+    if (enemy->get_ability() == ABILITY_HEAL)
+    {
+        ability = enemy_heal;
+    }
+    else if (enemy->get_ability() == ABILITY_TELEPORT)
+    {
+        ability = teleport;
+        if (!teleport->find_target(*enemy, *this, x, y))
+        {
+            enemy->clear_ability();
+            return;
+        }
+    }
+    if (ability != nullptr && ability->can_use(*enemy, *this, x, y))
+    {
+        ability->use(*enemy, *this, x, y);
+    }
+    enemy->clear_ability();
 }
 
 bool World::has_enemies_with_ap()

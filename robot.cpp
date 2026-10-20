@@ -1,5 +1,8 @@
 #include "robot.hpp"
+#include "map.hpp"
 #include "shield.hpp"
+#include "slow.hpp"
+#include "world.hpp"
 int Robot::normalize(int x, int min_x, int max_x)
 {
     if (x < min_x)
@@ -18,11 +21,19 @@ Robot::Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max,
     : hp(hp_max), hp_max(hp_max), dmg(dmg), mana(mana_max), mana_max(mana_max),
       exp(0), exp_max(exp_max), lvl(0), x(0), y(0), team(team), ap(speed * 2),
       ap_max(speed * 2), kills(0), speed(speed), vision(vision),
-      visible(visible), alive(true)
+      visible(visible), alive(true), ability(ABILITY_NONE), health_items(0),
+      mana_items(0), damage_items(0)
 {
 }
 
-void Robot::set_hp(int new_hp) { hp = normalize(new_hp, 0, hp_max); }
+void Robot::set_hp(int new_hp)
+{
+    hp = normalize(new_hp, 0, hp_max);
+    if (hp <= 0)
+    {
+        alive = false;
+    }
+}
 
 void Robot::set_max_hp(int new_max_hp)
 {
@@ -143,6 +154,18 @@ int Robot::interact(Robot &other, int damage)
     return -1;
 }
 
+void Robot::teleport_to(World &world, int new_x, int new_y)
+{
+    if (new_x == x && new_y == y)
+    {
+        return;
+    }
+    world.get_map().get_cell(x, y).set_busy(false);
+    x = new_x;
+    y = new_y;
+    world.get_map().get_cell(x, y).set_busy(true);
+}
+
 void Robot::set_coords(int x, int y)
 {
     this->x = x;
@@ -205,7 +228,10 @@ void Robot::update_statuses()
 {
     for (auto it = statuses.begin(); it != statuses.end();)
     {
-        (*it)->update(*this);
+        if ((*it)->get_type() != SLOW && (*it)->get_type() != OVERDRIVE)
+        {
+            (*it)->update(*this);
+        }
 
         if (!(*it)->is_active())
         {
@@ -219,20 +245,68 @@ void Robot::update_statuses()
     }
 }
 
+std::vector<std::string> Robot::get_status_labels()
+{
+    std::vector<std::string> labels;
+    for (Status *status : statuses)
+    {
+        if (status->is_active())
+        {
+            labels.push_back(status->get_label());
+        }
+    }
+    return labels;
+}
+
 bool Robot::can_move()
+{
+    return true;
+}
+
+void Robot::consume_slow()
+{
+    for (auto it = statuses.begin(); it != statuses.end(); ++it)
+    {
+        if ((*it)->get_type() != SLOW)
+        {
+            continue;
+        }
+        Slow *slow = (Slow *)*it;
+        slow->update(*this);
+        if (!slow->is_active())
+        {
+            delete slow;
+            statuses.erase(it);
+        }
+        return;
+    }
+}
+
+bool Robot::is_slowed()
+{
+    for (Status *status : statuses)
+    {
+        if (status->get_type() == SLOW && status->is_active())
+        {
+            Slow *slow = (Slow *)status;
+            return !slow->is_fresh();
+        }
+    }
+    return false;
+}
+
+void Robot::ready_slow()
 {
     for (Status *status : statuses)
     {
         if (status->get_type() == SLOW)
         {
-            return false;
+            ((Slow *)status)->make_ready();
         }
     }
-
-    return true;
 }
 
-bool Robot::can_use_ability()
+bool Robot::try_use_ability()
 {
     for (auto it = statuses.begin(); it != statuses.end(); ++it)
     {
@@ -246,6 +320,12 @@ bool Robot::can_use_ability()
 
     return true;
 }
+
+void Robot::set_ability(int new_ability) { ability = new_ability; }
+
+int Robot::get_ability() { return ability; }
+
+void Robot::clear_ability() { ability = ABILITY_NONE; }
 
 int Robot::get_shield()
 {
@@ -262,6 +342,29 @@ int Robot::get_shield()
 }
 
 int Robot::get_dmg() { return dmg; }
+
+void Robot::add_item(int count)
+{
+    health_items += count;
+    mana_items += count;
+    damage_items += count;
+}
+
+void Robot::use_item()
+{
+    if (health_items <= 0)
+    {
+        return;
+    }
+    health_items--;
+    mana_items--;
+    damage_items--;
+    upd_hp(50);
+    set_mana(mana + 50);
+    set_dmg(dmg + 5);
+}
+
+int Robot::get_items() { return health_items + mana_items + damage_items; }
 
 void Robot::make_dead() { alive = false; }
 

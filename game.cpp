@@ -15,64 +15,49 @@ Game::Game(World &world)
     around = new Around_ab(1, 10, 20);
     range = new Range_ab(3, 15, 25);
     heal = new Heal_ab(0, 15, 20);
-    teleport = new Teleport_ab(5, 0, 25);
+    teleport = new Teleport_ab(3, 0, 25);
 }
 
 void Game::player_turn(Render &render)
 {
-    if (!world.player_can_use_ability())
+    Input::AbilityCmd cmd =
+        Input::get_ability(render.get_draw_scale(), render.get_offset_x());
+    if (cmd.used && world.player_try_use_ability())
     {
-        world.player_update_statuses();
-        if (world.is_player_turn_over())
+        if (cmd.slot == 1)
         {
-            end_turn();
+            around->use(world.get_player_ref(), world, 0, 0);
         }
-        return;
-    }
-
-    Input::AbilityCmd cmd = Input::get_ability(render.get_draw_scale());
-    if (!cmd.used)
-    {
-        world.player_update_statuses();
-        if (world.is_player_turn_over())
+        else if (cmd.slot == 2)
         {
-            end_turn();
+            range->use(world.get_player_ref(), world, (size_t)cmd.target_x,
+                       (size_t)cmd.target_y);
         }
-        return;
+        else if (cmd.slot == 3)
+        {
+            heal->use(world.get_player_ref(), world, 0, 0);
+        }
+        else if (cmd.slot == 4)
+        {
+            teleport->use(world.get_player_ref(), world, (size_t)cmd.target_x,
+                          (size_t)cmd.target_y);
+        }
     }
 
-
-    if (cmd.slot == 1)
-    {
-        around->use(world.get_player_ref(), world, 0, 0);
-    }
-    else if (cmd.slot == 2)
-    {
-        range->use(world.get_player_ref(), world, (size_t)cmd.target_x, (size_t)cmd.target_y);
-    }
-    else if (cmd.slot == 3)
-    {
-        heal->use(world.get_player_ref(), world, 0, 0);
-    }
-    else if (cmd.slot == 4)
-    {
-        teleport->use(world.get_player_ref(), world, (size_t)cmd.target_x, (size_t)cmd.target_y);
-    }
-
-    world.player_update_statuses();
     if (world.is_player_turn_over())
     {
         end_turn();
     }
 }
 
-
-
 void Game::end_turn()
 {
+    world.player_update_statuses();
+    world.player_ready_slow();
     turn = 0;
     world.add_step();
     world.spawn_from_factories();
+    world.start_enemy_turn();
 }
 
 void Game::update(Render &render)
@@ -89,17 +74,25 @@ void Game::update(Render &render)
     }
     if (turn == 1)
     {
+        if (world.player_is_slowed())
+        {
+            world.player_consume_slow();
+            end_turn();
+            return;
+        }
         player_turn(render);
     }
 
     else
     {
-        if (GetTime() - enemy_move_timer >= 0.01)
+        if (GetTime() - enemy_move_timer >= 0.1)
         {
             world.process_enemy_turns(enemy_move_timer);
             enemy_move_timer = GetTime();
             if (!world.has_enemies_with_ap())
             {
+                world.enemies_update_statuses();
+                world.enemies_ready_slow();
                 world.refill_ap();
                 turn = 1;
             }
@@ -141,15 +134,7 @@ void Game::run(Render &render)
         abilities.push_back(range);
         abilities.push_back(heal);
         abilities.push_back(teleport);
-        if (world.player_alive())
-        {
-            render.draw(world.get_map(), world.get_player_ref(), world.get_enemies_list(), game_over, level_up, abilities);
-        }
-        else
-        {
-            Robot dummy(0, 0, 0, 0, 0, 0, 0, false);
-            render.draw(world.get_map(), dummy, world.get_enemies_list(), game_over, level_up, abilities);
-        }
+        render.draw(world, game_over, level_up, abilities);
         if (level_up > 0)
         {
             int level_choice = Input::get_level_up_choice();

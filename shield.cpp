@@ -20,3 +20,12 @@ void Shield::combine(Status *status)
 int Shield::get_damage() { return damage; }
 
 void Shield::set_damage(int damage) { this->damage = damage; }
+
+std::string Shield::get_label()
+{
+    return "SHIELD " + std::to_string(damage);
+}
+
+char Shield::get_symbol() { return 'S'; }
+
+Status *Shield::clone() { return new Shield(damage); }

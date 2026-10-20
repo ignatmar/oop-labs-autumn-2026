@@ -19,4 +19,14 @@ void Burning::combine(Status *status)
     turns += burning->turns;
 }
 
+std::string Burning::get_label()
+{
+    return "BURNING x" + std::to_string(turns) + " (" +
+           std::to_string(damage) + " dmg)";
+}
+
+char Burning::get_symbol() { return 'B'; }
+
+Status *Burning::clone() { return new Burning(turns, damage); }
+
 StatusType Burning::get_type() { return BURNING; }

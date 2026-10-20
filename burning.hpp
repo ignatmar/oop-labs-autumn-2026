@@ -1,5 +1,6 @@
 #pragma once
 #include "status.hpp"
+#include <string>
 
 class Burning : public Status
 {
@@ -14,4 +15,7 @@ class Burning : public Status
     bool is_active() override;
     void combine(Status *status) override;
     StatusType get_type() override;
+    std::string get_label() override;
+    char get_symbol() override;
+    Status *clone() override;
 };

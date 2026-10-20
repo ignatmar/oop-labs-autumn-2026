@@ -4,15 +4,18 @@
 #include "render.hpp"
 #include "robot.hpp"
 #include "world.hpp"
+#include <cstdlib>
+#include <ctime>
 int main()
 {
+    std::srand(std::time(nullptr));
     std::vector<std::vector<char>> symbols = {{'.', '.', '.', 'M', 'M'},
                                               {'.', '.', '.', '.', '.'},
                                               {'.', 'M', '.', 'S', '.'},
                                               {'.', '.', '.', '.', '.'},
                                               {'M', '.', '.', '.', '.'}};
 
-    Robot player(300, 30, 500, 7, 100, 1, 8, true);
+    Robot player(3000, 30, 500, 7, 100, 1, 100, true);
 
     Robot enemy_1(80, 10, 50, 6, 100, 2, 1, false);
     Robot enemy_2(80, 10, 50, 6, 100, 2, 1, false);

@@ -4,6 +4,9 @@
 #include "robot.hpp"
 #include <vector>
 
+class Ability;
+class Teleport_ab;
+
 class World
 {
   private:
@@ -13,8 +16,12 @@ class World
     std::vector<Factory *> factories;
     int steps;
 
+    Ability *enemy_heal;
+    Teleport_ab *teleport;
+
   public:
     World(Map &map);
+    ~World();
     void set_player(Robot *robot);
     void add_enemy(Robot *robot);
     void add_factory(Factory *factory);
@@ -34,17 +41,24 @@ class World
     bool all_enemies_dead();
     bool player_alive();
     void player_update_statuses();
-    bool player_can_use_ability();
+    void player_ready_slow();
+    void enemies_ready_slow();
+    void enemies_update_statuses();
+    bool player_try_use_ability();
+    bool player_is_slowed();
+    void player_consume_slow();
 
     void refill_ap();
     bool is_player_turn_over();
     Robot &get_player_ref();
     std::vector<Robot *> &get_enemies_list();
-    int get_player_dmg();
 
     bool check_coords(size_t x, size_t y);
     Cell &get_cell(int x, int y);
+    void apply_cell_statuses(Robot &robot, int x, int y);
     void set_factory(size_t x, size_t y);
     void process_enemy_turns(double &timer);
+    void start_enemy_turn();
+    void enemy_use_ability(Robot *enemy);
     bool has_enemies_with_ap();
 };

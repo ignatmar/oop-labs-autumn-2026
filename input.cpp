@@ -37,7 +37,7 @@ Input::MoveCmd Input::get_move()
     return cmd;
 }
 
-Input::AbilityCmd Input::get_ability(int draw_scale)
+Input::AbilityCmd Input::get_ability(int draw_scale, int offset_x)
 {
     AbilityCmd cmd{false, 0, 0, 0};
 
@@ -55,7 +55,7 @@ Input::AbilityCmd Input::get_ability(int draw_scale)
         Vector2 mouse = GetMousePosition();
         cmd.used = true;
         cmd.slot = 2;
-        cmd.target_x = (int)(mouse.x / draw_scale);
+        cmd.target_x = (int)((mouse.x - offset_x) / draw_scale);
         cmd.target_y = (int)(mouse.y / draw_scale);
         return cmd;
     }
@@ -74,7 +74,7 @@ Input::AbilityCmd Input::get_ability(int draw_scale)
         Vector2 mouse = GetMousePosition();
         cmd.used = true;
         cmd.slot = 4;
-        cmd.target_x = (int)(mouse.x / draw_scale);
+        cmd.target_x = (int)((mouse.x - offset_x) / draw_scale);
         cmd.target_y = (int)(mouse.y / draw_scale);
         return cmd;
     }
