@@ -2,6 +2,7 @@
 
 #include "ability.hpp"
 #include "render/render.hpp"
+#include "view_modes/view_modes.hpp"
 #include "world/world.hpp"
 
 enum GAME_STATUS
@@ -25,6 +26,7 @@ class Game
     Ability *teleport;
 
     int level_up;
+    ViewModeState view_modes;
 
   public:
     Game(World &world);

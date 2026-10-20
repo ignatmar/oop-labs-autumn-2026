@@ -1,4 +1,5 @@
 #include "input/input.hpp"
+#include "view_modes/view_modes.hpp"
 #include <raylib.h>
 
 Input::MoveCmd Input::get_move()
@@ -96,6 +97,28 @@ int Input::get_item()
     {
         return 2;
     }
+    return -1;
+}
+
+int Input::get_view_mode()
+{
+    if (!IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        return -1;
+    }
+
+    Vector2 mouse = GetMousePosition();
+    int panel_y = GetScreenHeight() - UI_PANEL_HEIGHT;
+
+    for (int i = 0; i < VIEW_MODE_COUNT; i++)
+    {
+        if (CheckCollisionPointRec(
+                mouse, view_mode_button(i, GetScreenWidth(), panel_y)))
+        {
+            return i;
+        }
+    }
+
     return -1;
 }
 

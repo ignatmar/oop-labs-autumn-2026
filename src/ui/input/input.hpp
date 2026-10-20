@@ -21,4 +21,5 @@ class Input
     static MoveCmd get_move();
     static AbilityCmd get_ability(int draw_scale, int offset_x);
     static int get_item();
+    static int get_view_mode();
 };

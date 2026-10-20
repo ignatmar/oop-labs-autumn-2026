@@ -139,7 +139,14 @@ void Game::run(Render &render)
         abilities.push_back(range);
         abilities.push_back(heal);
         abilities.push_back(teleport);
-        render.draw(world, game_over, level_up, abilities);
+
+        int view_mode = Input::get_view_mode();
+        if (view_mode >= 0)
+        {
+            toggle_view_mode(view_modes, view_mode);
+        }
+
+        render.draw(world, game_over, level_up, abilities, view_modes);
         if (level_up > 0)
         {
             int level_choice = Input::get_level_up_choice();

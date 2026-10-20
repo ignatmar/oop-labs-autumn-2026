@@ -5,14 +5,10 @@
 #include <raylib.h>
 #include <string>
 
-Render::Render(int draw_scale)
-    : draw_scale(draw_scale), offset_x(0), highlight_enemies(false),
-      highlight_impassable(false), highlight_statuses(false)
-{
-}
+Render::Render(int draw_scale) : draw_scale(draw_scale), offset_x(0) {}
 
 void Render::draw(World &world, int game_over, int level_up,
-                  std::vector<Ability *> abilities)
+                  std::vector<Ability *> abilities, ViewModeState &view_modes)
 {
     Map &map = world.get_map();
     Robot &player = world.get_player_ref();
@@ -69,7 +65,7 @@ void Render::draw(World &world, int game_over, int level_up,
             {
                 DrawRectangle(offset_x + x * draw_scale, y * draw_scale,
                               draw_scale, draw_scale, cell_color);
-                draw_cell_highlights(cell, x, y);
+                draw_cell_highlights(cell, x, y, view_modes);
                 draw_cell_statuses(cell, x, y);
                 draw_cell_items(cell, x, y);
             }
@@ -112,7 +108,7 @@ void Render::draw(World &world, int game_over, int level_up,
                  (float)(e_y * draw_scale), (float)draw_scale,
                  (float)draw_scale},
                 {0, 0}, 0, WHITE);
-            if (highlight_enemies)
+            if (view_modes.enemies)
             {
                 DrawRectangle(offset_x + e_x * draw_scale, e_y * draw_scale,
                               draw_scale, draw_scale, Fade(RED, 0.4f));
@@ -121,7 +117,7 @@ void Render::draw(World &world, int game_over, int level_up,
     }
 
     draw_ap_text(world);
-    draw_abilities(world, abilities);
+    draw_abilities(world, abilities, view_modes);
     draw_player_bars(world);
     if (game_over)
     {
@@ -171,15 +167,16 @@ void Render::toggle_fullscreen()
     }
 }
 
-void Render::draw_abilities(World &world, std::vector<Ability *> abilities)
+void Render::draw_abilities(World &world, std::vector<Ability *> abilities,
+                            ViewModeState &view_modes)
 {
     Map &map = world.get_map();
     Robot &player = world.get_player_ref();
     int panel_y = map.get_height() * draw_scale;
-    int panel_height = 200;
+    int panel_height = UI_PANEL_HEIGHT;
 
-    int square_size = 70;
-    int spacing = 35;
+    int square_size = UI_ABILITY_SQUARE;
+    int spacing = UI_ABILITY_SPACING;
 
     DrawRectangle(0, panel_y, GetScreenWidth(), panel_height, BLACK);
 
@@ -233,78 +230,31 @@ void Render::draw_abilities(World &world, std::vector<Ability *> abilities)
                  WHITE);
     }
 
-    int mode_start_x = start_x + total_width + 50;
-    draw_view_modes(panel_y, mode_start_x);
+    draw_view_modes(panel_y, view_modes);
 }
 
-void Render::draw_view_modes(int panel_y, int start_x)
+void Render::draw_view_modes(int panel_y, ViewModeState &view_modes)
 {
     const char *names[] = {"Standard", "Enemies", "Impassable", "Statuses"};
     Color colors[] = {DARKGRAY, Fade(RED, 0.6f), Fade(ORANGE, 0.6f),
                       Fade(SKYBLUE, 0.6f)};
 
-    int button_width = 120;
-    int button_height = 38;
-    int spacing = 10;
+    bool active[] = {!view_modes.enemies && !view_modes.impassable &&
+                         !view_modes.statuses,
+                     view_modes.enemies, view_modes.impassable,
+                     view_modes.statuses};
 
-    Rectangle buttons[4];
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < VIEW_MODE_COUNT; i++)
     {
-        int column = i % 2;
-        int row = i / 2;
-        buttons[i] = {
-            (float)(start_x + column * (button_width + spacing)),
-            (float)(panel_y + 10 + row * (button_height + spacing)),
-            (float)button_width, (float)button_height};
-    }
+        Rectangle button = view_mode_button(i, GetScreenWidth(), panel_y);
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    {
-        Vector2 mouse = GetMousePosition();
-        for (int i = 0; i < 4; i++)
-        {
-            if (!CheckCollisionPointRec(mouse, buttons[i]))
-            {
-                continue;
-            }
-
-            if (i == 0)
-            {
-                highlight_enemies = false;
-                highlight_impassable = false;
-                highlight_statuses = false;
-            }
-            else if (i == 1)
-            {
-                highlight_enemies = !highlight_enemies;
-            }
-            else if (i == 2)
-            {
-                highlight_impassable = !highlight_impassable;
-            }
-            else
-            {
-                highlight_statuses = !highlight_statuses;
-            }
-            break;
-        }
-    }
-
-    bool active[] = {!highlight_enemies && !highlight_impassable &&
-                         !highlight_statuses,
-                     highlight_enemies, highlight_impassable,
-                     highlight_statuses};
-
-    for (int i = 0; i < 4; i++)
-    {
-        DrawRectangleRec(buttons[i], active[i] ? colors[i] : BLACK);
-        DrawRectangleLinesEx(buttons[i], active[i] ? 2.0f : 1.0f,
+        DrawRectangleRec(button, active[i] ? colors[i] : BLACK);
+        DrawRectangleLinesEx(button, active[i] ? 2.0f : 1.0f,
                              active[i] ? WHITE : GRAY);
 
         int text_width = MeasureText(names[i], 16);
-        DrawText(names[i],
-                 (int)(buttons[i].x + (button_width - text_width) / 2),
-                 (int)(buttons[i].y + (button_height - 16) / 2), 16, WHITE);
+        DrawText(names[i], (int)(button.x + (button.width - text_width) / 2),
+                 (int)(button.y + (button.height - 16) / 2), 16, WHITE);
     }
 }
 
@@ -436,17 +386,18 @@ void Render::draw_cell_items(Cell &cell, int x, int y)
     }
 }
 
-void Render::draw_cell_highlights(Cell &cell, int x, int y)
+void Render::draw_cell_highlights(Cell &cell, int x, int y,
+                                  ViewModeState &view_modes)
 {
     int pixel_x = offset_x + x * draw_scale;
     int pixel_y = y * draw_scale;
 
-    if (highlight_impassable && !cell.can_walk())
+    if (view_modes.impassable && !cell.can_walk())
     {
         DrawRectangle(pixel_x, pixel_y, draw_scale, draw_scale,
                       Fade(ORANGE, 0.45f));
     }
-    if (highlight_statuses && cell.get_status_count() > 0)
+    if (view_modes.statuses && cell.get_status_count() > 0)
     {
         DrawRectangle(pixel_x, pixel_y, draw_scale, draw_scale,
                       Fade(SKYBLUE, 0.45f));
