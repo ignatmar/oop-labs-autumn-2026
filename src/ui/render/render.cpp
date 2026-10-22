@@ -193,7 +193,7 @@ void Render::draw_abilities(World &world, std::vector<Ability *> abilities,
     int total_width = square_size * 4 + spacing * 3;
     int start_x = (GetScreenWidth() - total_width) / 2;
 
-    const char *names[] = {"Around hit", "Range hit", "Heal", "Teleport"};
+    std::string names[] = {"Around hit", "Range hit", "Heal", "Teleport"};
     Texture2D textures[] = {around_texture, range_texture, heal_texture,
                             teleport_texture};
     for (int i = 0; i < 4; i++)
@@ -209,16 +209,16 @@ void Render::draw_abilities(World &world, std::vector<Ability *> abilities,
                 {(float)x, (float)panel_y + 10, 70, 70}, {0, 0}, 0, WHITE);
         }
 
-        int text_width = MeasureText(names[i], 16);
+        int text_width = MeasureText(names[i].c_str(), 16);
         int text_x = x + (square_size - text_width) / 2;
 
-        DrawText(names[i], text_x, panel_y + 90, 16, WHITE);
+        DrawText(names[i].c_str(), text_x, panel_y + 90, 16, WHITE);
     }
 
     int item_total = square_size * ITEM_COUNT + spacing * (ITEM_COUNT - 1);
     int item_start_x = start_x - item_total - 50;
 
-    const char *item_names[] = {"Health", "Mana", "Attack"};
+    std::string item_names[] = {"Health", "Mana", "Attack"};
     Color item_colors[] = {RED, BLUE, ORANGE};
 
     for (int i = 0; i < ITEM_COUNT; i++)
@@ -235,9 +235,9 @@ void Render::draw_abilities(World &world, std::vector<Ability *> abilities,
         DrawText(count.c_str(), center_x - count_width / 2, panel_y + 56, 16,
                  WHITE);
 
-        int name_width = MeasureText(item_names[i], 16);
-        DrawText(item_names[i], center_x - name_width / 2, panel_y + 90, 16,
-                 WHITE);
+        int name_width = MeasureText(item_names[i].c_str(), 16);
+        DrawText(item_names[i].c_str(), center_x - name_width / 2,
+                 panel_y + 90, 16, WHITE);
     }
 
     draw_view_modes(panel_y, view_modes);
@@ -245,7 +245,7 @@ void Render::draw_abilities(World &world, std::vector<Ability *> abilities,
 
 void Render::draw_view_modes(int panel_y, ViewModeState &view_modes)
 {
-    const char *names[] = {"Standard", "Enemies", "Impassable", "Statuses"};
+    std::string names[] = {"Standard", "Enemies", "Impassable", "Statuses"};
     Color colors[] = {DARKGRAY, Fade(RED, 0.6f), Fade(ORANGE, 0.6f),
                       Fade(SKYBLUE, 0.6f)};
 
@@ -262,8 +262,9 @@ void Render::draw_view_modes(int panel_y, ViewModeState &view_modes)
         DrawRectangleLinesEx(button, active[i] ? 2.0f : 1.0f,
                              active[i] ? WHITE : GRAY);
 
-        int text_width = MeasureText(names[i], 16);
-        DrawText(names[i], (int)(button.x + (button.width - text_width) / 2),
+        int text_width = MeasureText(names[i].c_str(), 16);
+        DrawText(names[i].c_str(),
+                 (int)(button.x + (button.width - text_width) / 2),
                  (int)(button.y + (button.height - 16) / 2), 16, WHITE);
     }
 }

@@ -5,24 +5,20 @@
 #include "overdrive/overdrive.hpp"
 #include "shield/shield.hpp"
 #include "slow/slow.hpp"
-#include <utility>
 
 Level::Level(LevelData &data, PlayerProfile &profile)
+    : player(new Robot(profile.hp_max, profile.dmg, profile.mana_max,
+                       profile.speed, profile.exp_max, 1, profile.vision,
+                       true)),
+      world(new World(new Map(data.width, data.height, data.tiles)))
 {
-    Map map(data.width, data.height, data.tiles);
-    world = std::make_unique<World>(std::move(map));
-
     for (FactorySpawn &spawn : data.factories)
     {
         int rank = spawn.rank < 1 ? 1 : spawn.rank;
-        world->add_factory(
-            std::make_unique<Factory>(spawn.x, spawn.y, spawn.freq, rank));
+        world->add_factory(new Factory(spawn.x, spawn.y, spawn.freq, rank));
         world->set_factory((size_t)spawn.x, (size_t)spawn.y);
     }
 
-    player = std::make_unique<Robot>(
-        profile.hp_max, profile.dmg, profile.mana_max, profile.speed,
-        profile.exp_max, 1, profile.vision, true);
     player->set_hp(profile.hp);
     player->set_exp(profile.exp);
     player->set_lvl(profile.lvl);
@@ -64,7 +60,7 @@ Level::Level(LevelData &data, PlayerProfile &profile)
     if (spawn_x >= 0)
     {
         player->set_coords(spawn_x, spawn_y);
-        world->set_player(player.get());
+        world->set_player(player);
     }
 
     for (EnemySpawn &spawn : data.enemies)
@@ -80,12 +76,12 @@ Level::Level(LevelData &data, PlayerProfile &profile)
         }
 
         int rank = spawn.rank < 1 ? 1 : spawn.rank;
-        auto enemy = std::make_unique<Robot>(
-            80 + rank * 40, 10 + rank * 2, 50 + rank * 10, 6, 100 + rank * 20,
-            2, 10, true);
+        Robot *enemy = new Robot(80 + rank * 40, 10 + rank * 2,
+                                 50 + rank * 10, 6, 100 + rank * 20, 2, 10,
+                                 true);
         enemy->set_lvl(rank);
         enemy->set_coords(spawn.x, spawn.y);
-        world->add_enemy(std::move(enemy));
+        world->add_enemy(enemy);
     }
 
     for (StatusSpawn &spawn : data.statuses)
@@ -147,6 +143,12 @@ Status *Level::create_status(StatusSpawn &spawn)
         return new AttackBoost(bonus);
     }
     return nullptr;
+}
+
+Level::~Level()
+{
+    delete world;
+    delete player;
 }
 
 World &Level::get_world()

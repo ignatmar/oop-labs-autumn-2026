@@ -5,29 +5,23 @@
 #include "menu/menu.hpp"
 #include "render/render.hpp"
 #include "save/save_game.hpp"
-#include <utility>
-
-enum
-{
-    RANDOM_LEVEL_COUNT = 5
-};
 
 class App
 {
   private:
     Render render;
     Menu menu;
+    SaveGame save_game;
 
-    template <typename Levels>
-    void play(Levels levels, SaveData *save)
+    template <typename Levels> void play(Levels levels, SaveData *save)
     {
-        Game<Levels> game(std::move(levels));
+        Game<Levels> game(levels);
         GameResult result = game.run(render, save);
 
         if (result == GameResult::QUIT_TO_MENU)
         {
             SaveData data = game.make_save();
-            if (SaveGame::write("save.txt", data))
+            if (save_game.write("save.txt", data))
             {
                 menu.set_message("Game saved");
             }

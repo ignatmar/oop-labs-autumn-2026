@@ -20,7 +20,7 @@ struct SaveData
 class SaveGame
 {
   public:
-    static bool write(std::string path, SaveData &data);
-    static bool read(std::string path, SaveData &data);
-    static bool exists(std::string path);
+    bool write(std::string path, SaveData &data);
+    bool read(std::string path, SaveData &data);
+    bool exists(std::string path);
 };

@@ -20,7 +20,7 @@ void Around_ab::use(Robot &robot, World &world, size_t, size_t)
     std::vector<Robot *> &enemy_robots = world.get_enemies_list();
     for (Robot *enemy : enemy_robots)
     {
-        if (enemy == nullptr)
+        if (enemy == nullptr || !enemy->if_alive())
         {
             continue;
         }
@@ -28,8 +28,11 @@ void Around_ab::use(Robot &robot, World &world, size_t, size_t)
                 std::pow(enemy->get_y() - yy, 2) <=
             std::pow(radius, 2))
         {
-            world.move_robot(&robot, enemy->get_x(), enemy->get_y(), damage, 0);
-            enemy->add_status(new Overdrive());
+            world.damage_robot(&robot, enemy, damage);
+            if (enemy->if_alive())
+            {
+                enemy->add_status(new Overdrive());
+            }
         }
     }
     robot.set_mana(robot.get_mana() - cost);

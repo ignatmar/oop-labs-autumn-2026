@@ -17,12 +17,12 @@ class Input
         int target_y;
     };
 
-    static int get_level_up_choice();
-    static MoveCmd get_move();
-    static AbilityCmd get_ability(int draw_scale, int offset_x);
-    static int get_item();
-    static int get_view_mode();
-    static bool fullscreen_requested();
-    static bool menu_requested();
-    static bool confirm_requested();
+    int get_level_up_choice();
+    MoveCmd get_move();
+    AbilityCmd get_ability(int draw_scale, int offset_x);
+    int get_item();
+    int get_view_mode();
+    bool fullscreen_requested();
+    bool menu_requested();
+    bool confirm_requested();
 };

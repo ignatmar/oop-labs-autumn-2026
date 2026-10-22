@@ -1,41 +1,47 @@
 #include "levels/random_levels/random_level_generator.hpp"
 #include <cstddef>
-#include <queue>
 #include <random>
-#include <utility>
 #include <vector>
+
+struct QueuePoint
+{
+    int x;
+    int y;
+};
 
 RandomLevelGenerator::RandomLevelGenerator(unsigned seed) : seed(seed) {}
 
-static bool reachable_from_player(LevelData &data,
-                                  std::vector<std::vector<bool>> &factory_cells)
+bool reachable_from_player(LevelData &data,
+                           std::vector<std::vector<bool>> &factory_cells)
 {
     std::vector<std::vector<bool>> visited(
         data.height, std::vector<bool>(data.width, false));
-    std::queue<std::pair<int, int>> queue;
-    queue.push({data.player.x, data.player.y});
+    std::vector<QueuePoint> queue;
+    QueuePoint start = {data.player.x, data.player.y};
+    queue.push_back(start);
     visited[data.player.y][data.player.x] = true;
 
     int directions[4][2] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-    while (!queue.empty())
+    size_t head = 0;
+    while (head < queue.size())
     {
-        std::pair<int, int> current = queue.front();
-        queue.pop();
+        QueuePoint current = queue[head];
+        head++;
         for (int i = 0; i < 4; i++)
         {
-            int x = current.first + directions[i][0];
-            int y = current.second + directions[i][1];
+            int x = current.x + directions[i][0];
+            int y = current.y + directions[i][1];
             if (x < 0 || y < 0 || x >= data.width || y >= data.height)
             {
                 continue;
             }
-            if (visited[y][x] || factory_cells[y][x] ||
-                data.tiles[y][x] == 'M')
+            if (visited[y][x] || factory_cells[y][x] || data.tiles[y][x] == 'M')
             {
                 continue;
             }
             visited[y][x] = true;
-            queue.push({x, y});
+            QueuePoint next = {x, y};
+            queue.push_back(next);
         }
     }
 
@@ -92,9 +98,9 @@ LevelData RandomLevelGenerator::make(int index)
         data.player.x = 1;
         data.player.y = 1;
         data.player.hp_max = 3000;
-        data.player.dmg = 30;
+        data.player.dmg = 300;
         data.player.mana_max = 500;
-        data.player.speed = 7;
+        data.player.speed = 10;
         data.player.exp_max = 100;
         data.player.vision = 100;
 
@@ -268,8 +274,7 @@ LevelData RandomLevelGenerator::make(int index)
                     if (item_count == 2)
                     {
                         ItemType second =
-                            (ItemType)((first + 1 +
-                                        rng() % (ITEM_COUNT - 1)) %
+                            (ItemType)((first + 1 + rng() % (ITEM_COUNT - 1)) %
                                        ITEM_COUNT);
                         spawn.type = second;
                         data.items.push_back(spawn);

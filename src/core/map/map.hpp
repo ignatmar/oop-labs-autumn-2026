@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cell/cell.hpp"
+#include <cstddef>
 #include <vector>
 #define MAX_MAP_SIZE 100
 #define MIN_MAP_SIZE 25
@@ -10,14 +11,11 @@ class Map
   private:
     size_t width;
     size_t height;
-    std::vector<std::vector<Cell>> field;
+    std::vector<std::vector<Cell *>> field;
 
   public:
     Map(size_t width, size_t height, std::vector<std::vector<char>> field);
-    Map(const Map &other) = delete;
-    Map &operator=(const Map &other) = delete;
-    Map(Map &&other) = default;
-    Map &operator=(Map &&other) = default;
+    ~Map();
 
     int get_width();
     int get_height();

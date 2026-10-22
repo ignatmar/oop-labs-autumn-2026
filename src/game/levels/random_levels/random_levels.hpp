@@ -2,6 +2,11 @@
 #include "levels/level_data.hpp"
 #include "levels/random_levels/random_level_generator.hpp"
 
+enum
+{
+    RANDOM_LEVEL_COUNT = 5
+};
+
 template <int N>
 class RandomLevels
 {

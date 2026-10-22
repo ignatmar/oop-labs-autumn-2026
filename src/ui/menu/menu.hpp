@@ -23,7 +23,7 @@ class Menu
 
     std::string message;
 
-    bool button(Rectangle rectangle, const char *text);
+    bool button(Rectangle rectangle, std::string text);
 
   public:
     Menu();

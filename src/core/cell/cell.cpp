@@ -27,41 +27,6 @@ Cell::~Cell()
     }
 }
 
-Cell::Cell(Cell &&other)
-    : surface(other.surface), visible(other.visible),
-      has_robot(other.has_robot), statuses(other.statuses)
-{
-    for (int i = 0; i < ITEM_COUNT; i++)
-    {
-        items[i] = other.items[i];
-        other.items[i] = 0;
-    }
-    other.statuses.clear();
-}
-
-Cell &Cell::operator=(Cell &&other)
-{
-    if (this == &other)
-    {
-        return *this;
-    }
-    for (Status *status : statuses)
-    {
-        delete status;
-    }
-    surface = other.surface;
-    visible = other.visible;
-    has_robot = other.has_robot;
-    for (int i = 0; i < ITEM_COUNT; i++)
-    {
-        items[i] = other.items[i];
-        other.items[i] = 0;
-    }
-    statuses = other.statuses;
-    other.statuses.clear();
-    return *this;
-}
-
 bool Cell::can_walk() { return surface != MOUNTAIN && surface != FACTORY; }
 
 int Cell::get_surface() { return surface; }

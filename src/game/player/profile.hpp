@@ -28,16 +28,21 @@ struct PlayerProfile
     size_t kills = 0;
     int items[ITEM_COUNT] = {};
 
-    static PlayerProfile from_spawn(PlayerSpawn &spawn)
+    void from_spawn(PlayerSpawn &spawn)
     {
-        PlayerProfile profile;
-        profile.hp = spawn.hp_max;
-        profile.hp_max = spawn.hp_max;
-        profile.dmg = spawn.dmg;
-        profile.mana_max = spawn.mana_max;
-        profile.speed = spawn.speed;
-        profile.exp_max = spawn.exp_max;
-        profile.vision = spawn.vision;
-        return profile;
+        hp = spawn.hp_max;
+        hp_max = spawn.hp_max;
+        dmg = spawn.dmg;
+        mana_max = spawn.mana_max;
+        speed = spawn.speed;
+        exp = 0;
+        exp_max = spawn.exp_max;
+        lvl = 0;
+        vision = spawn.vision;
+        kills = 0;
+        for (int i = 0; i < ITEM_COUNT; i++)
+        {
+            items[i] = 0;
+        }
     }
 };

@@ -1,13 +1,13 @@
 #include "levels/fixed_levels/fixed_levels.hpp"
-#include <algorithm>
-#include <filesystem>
+#include <cstddef>
+#include <cstdio>
+#include <cstring>
+#include <dirent.h>
 #include <fstream>
-#include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
-static StatusType parse_status(std::string value)
+StatusType parse_status(std::string value)
 {
     if (value == "overdrive")
     {
@@ -28,7 +28,7 @@ static StatusType parse_status(std::string value)
     return SLOW;
 }
 
-static ItemType parse_item(std::string value)
+ItemType parse_item(std::string value)
 {
     if (value == "mana")
     {
@@ -43,31 +43,46 @@ static ItemType parse_item(std::string value)
 
 FixedLevels::FixedLevels(std::string directory)
 {
-    std::error_code error;
-    std::filesystem::path dir(directory);
-    if (!std::filesystem::exists(dir, error))
+    DIR *dir = opendir(directory.c_str());
+    if (dir == nullptr)
     {
         return;
     }
 
     std::vector<std::string> files;
-    for (std::filesystem::directory_iterator it(dir, error), end; it != end;
-         it.increment(error))
+    struct dirent *entry = nullptr;
+    while ((entry = readdir(dir)) != nullptr)
     {
-        if (error)
+        std::string name = entry->d_name;
+        if (name.size() <= 4 || name.substr(name.size() - 4) != ".txt")
         {
-            break;
+            continue;
         }
-        if (it->path().extension() == ".txt")
+        std::string path = directory;
+        if (!path.empty() && path.back() != '/')
         {
-            files.push_back(it->path().string());
+            path += "/";
         }
+        path += name;
+        files.push_back(path);
     }
-    std::sort(files.begin(), files.end());
+    closedir(dir);
 
-    for (std::string &file : files)
+    for (size_t i = 1; i < files.size(); i++)
     {
-        load_file(file);
+        std::string key = files[i];
+        size_t j = i;
+        while (j > 0 && files[j - 1] > key)
+        {
+            files[j] = files[j - 1];
+            j--;
+        }
+        files[j] = key;
+    }
+
+    for (size_t i = 0; i < files.size(); i++)
+    {
+        load_file(files[i]);
     }
 }
 
@@ -100,61 +115,64 @@ void FixedLevels::load_file(std::string path)
             continue;
         }
 
-        std::istringstream stream(line);
-        std::string command;
-        stream >> command;
-        if (command.empty())
+        char command[64] = {};
+        if (std::sscanf(line.c_str(), "%63s", command) != 1)
         {
             continue;
         }
 
-        if (command == "size")
+        if (std::strcmp(command, "size") == 0)
         {
-            stream >> data.width >> data.height;
+            std::sscanf(line.c_str(), "%*s %d %d", &data.width, &data.height);
         }
-        else if (command == "player")
+        else if (std::strcmp(command, "player") == 0)
         {
-            stream >> data.player.x >> data.player.y >> data.player.hp_max >>
-                data.player.dmg >> data.player.mana_max >> data.player.speed >>
-                data.player.exp_max >> data.player.vision;
+            std::sscanf(line.c_str(), "%*s %d %d %d %d %d %d %d %d",
+                        &data.player.x, &data.player.y, &data.player.hp_max,
+                        &data.player.dmg, &data.player.mana_max,
+                        &data.player.speed, &data.player.exp_max,
+                        &data.player.vision);
         }
-        else if (command == "enemy")
+        else if (std::strcmp(command, "enemy") == 0)
         {
             EnemySpawn spawn;
-            stream >> spawn.x >> spawn.y >> spawn.rank;
+            std::sscanf(line.c_str(), "%*s %d %d %d", &spawn.x, &spawn.y,
+                        &spawn.rank);
             data.enemies.push_back(spawn);
         }
-        else if (command == "factory")
+        else if (std::strcmp(command, "factory") == 0)
         {
             FactorySpawn spawn;
-            stream >> spawn.x >> spawn.y >> spawn.freq >> spawn.rank;
+            std::sscanf(line.c_str(), "%*s %d %d %d %d", &spawn.x, &spawn.y,
+                        &spawn.freq, &spawn.rank);
             data.factories.push_back(spawn);
         }
-        else if (command == "status")
+        else if (std::strcmp(command, "status") == 0)
         {
             StatusSpawn spawn;
-            std::string type;
-            stream >> spawn.x >> spawn.y >> type;
+            char type[64] = {};
+            std::sscanf(line.c_str(), "%*s %d %d %63s %d %d", &spawn.x,
+                        &spawn.y, type, &spawn.turns, &spawn.value);
             spawn.type = parse_status(type);
-            stream >> spawn.turns >> spawn.value;
             data.statuses.push_back(spawn);
         }
-        else if (command == "item")
+        else if (std::strcmp(command, "item") == 0)
         {
             ItemSpawn spawn;
-            std::string type;
-            stream >> spawn.x >> spawn.y >> type;
+            char type[64] = {};
+            std::sscanf(line.c_str(), "%*s %d %d %63s", &spawn.x, &spawn.y,
+                        type);
             spawn.type = parse_item(type);
             data.items.push_back(spawn);
         }
-        else if (command == "map")
+        else if (std::strcmp(command, "map") == 0)
         {
             map_started = true;
         }
     }
 
-    data.tiles = std::move(tiles);
-    levels.push_back(std::move(data));
+    data.tiles = tiles;
+    levels.push_back(data);
 }
 
 int FixedLevels::count()

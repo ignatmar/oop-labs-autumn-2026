@@ -29,10 +29,6 @@ class Cell
   public:
     Cell(char sym);
     ~Cell();
-    Cell(const Cell &other) = delete;
-    Cell &operator=(const Cell &other) = delete;
-    Cell(Cell &&other);
-    Cell &operator=(Cell &&other);
 
     bool can_walk();
     int get_surface();

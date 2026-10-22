@@ -1,5 +1,4 @@
 #include "save/save_game.hpp"
-#include <filesystem>
 #include <fstream>
 #include <string>
 
@@ -107,6 +106,6 @@ bool SaveGame::read(std::string path, SaveData &data)
 
 bool SaveGame::exists(std::string path)
 {
-    std::error_code error;
-    return std::filesystem::exists(path, error);
+    std::ifstream in(path);
+    return in.is_open();
 }

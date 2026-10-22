@@ -48,8 +48,6 @@ class Robot
     Robot(int hp_max, int dmg, int mana_max, int speed, int exp_max, int team,
           int vision, bool visible);
     ~Robot();
-    Robot(const Robot &other) = delete;
-    Robot &operator=(const Robot &other) = delete;
     void set_hp(int new_hp);
     void set_max_hp(int new_max_hp);
     void set_dmg(int new_dmg);

@@ -38,7 +38,7 @@ void App::run()
         else if (action == MENU_LOAD)
         {
             SaveData save;
-            if (!SaveGame::read("save.txt", save))
+            if (!save_game.read("save.txt", save))
             {
                 menu.set_message("Could not read save");
                 continue;

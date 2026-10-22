@@ -1,7 +1,6 @@
 #include "factory/factory.hpp"
 #include "robot/robot.hpp"
 #include "world/world.hpp"
-#include <memory>
 
 Factory::Factory(int x, int y, int freq, int rank)
     : x(x), y(y), freq(freq), rank(rank)
@@ -32,12 +31,12 @@ void Factory::spawn(World &world)
 
                 if (cell.can_walk() && !cell.if_busy())
                 {
-                    auto robot = std::make_unique<Robot>(
+                    Robot *robot = new Robot(
                         80 + rank * 40, 10 + rank * 2, 50 + rank * 10, 6,
                         100 + rank * 20, 2, 10, true);
                     robot->set_lvl(rank);
                     robot->set_coords(new_x, new_y);
-                    world.add_enemy(std::move(robot));
+                    world.add_enemy(robot);
                     return;
                 }
             }

@@ -4,22 +4,28 @@
 #include "item_use/item_use.hpp"
 #include "teleport_ab/teleport_ab.hpp"
 #include <cstdlib>
-#include <utility>
 
-World::World(Map map)
-    : map(std::move(map)), player(nullptr), steps(0), enemy_heal(nullptr),
-      teleport(nullptr)
+World::World(Map *map)
+    : map(map), player(nullptr), steps(0), enemy_heal(new Heal_ab(0, 0, 0)),
+      teleport(new Teleport_ab(5, 0, 10))
 {
-    enemy_heal = new Heal_ab(0, 0, 0);
     enemy_heal->unlock();
-    teleport = new Teleport_ab(5, 0, 10);
     teleport->unlock();
 }
 
 World::~World()
 {
+    for (size_t i = 0; i < enemies.size(); i++)
+    {
+        delete enemies[i];
+    }
+    for (size_t i = 0; i < factories.size(); i++)
+    {
+        delete factories[i];
+    }
     delete enemy_heal;
     delete teleport;
+    delete map;
 }
 
 void World::set_player(Robot *robot)
@@ -27,30 +33,27 @@ void World::set_player(Robot *robot)
     player = robot;
     if (player != nullptr)
     {
-        map.get_cell(player->get_x(), player->get_y()).set_busy(true);
+        map->get_cell(player->get_x(), player->get_y()).set_busy(true);
     }
 }
 
-void World::add_enemy(std::unique_ptr<Robot> robot)
+void World::add_enemy(Robot *robot)
 {
     if (robot == nullptr)
     {
         return;
     }
-    Robot *raw_robot = robot.get();
-    enemies.push_back(raw_robot);
-    owned_enemies.push_back(std::move(robot));
-    map.get_cell(raw_robot->get_x(), raw_robot->get_y()).set_busy(true);
+    enemies.push_back(robot);
+    map->get_cell(robot->get_x(), robot->get_y()).set_busy(true);
 }
 
-void World::add_factory(std::unique_ptr<Factory> factory)
+void World::add_factory(Factory *factory)
 {
     if (factory == nullptr)
     {
         return;
     }
-    factories.push_back(factory.get());
-    owned_factories.push_back(std::move(factory));
+    factories.push_back(factory);
 }
 
 std::vector<Factory *> &World::get_factories()
@@ -60,7 +63,7 @@ std::vector<Factory *> &World::get_factories()
 
 Map &World::get_map()
 {
-    return map;
+    return *map;
 }
 
 Robot *World::find_robot(int x, int y)
@@ -84,6 +87,30 @@ Robot *World::find_robot(int x, int y)
     return nullptr;
 }
 
+int World::damage_robot(Robot *attacker, Robot *target, int damage)
+{
+    if (attacker == nullptr || target == nullptr || attacker == target ||
+        !attacker->if_alive() || !target->if_alive() ||
+        attacker->get_team() == target->get_team())
+    {
+        return 0;
+    }
+
+    int levels = attacker->interact(*target, damage);
+
+    if (!target->if_alive())
+    {
+        int x = target->get_x();
+        int y = target->get_y();
+        if (x >= 0 && y >= 0 && check_coords((size_t)x, (size_t)y))
+        {
+            map->get_cell(x, y).set_busy(false);
+        }
+    }
+
+    return levels;
+}
+
 int World::move_robot(Robot *robot, int new_x, int new_y, int damage, int action_points)
 {
     if (robot == nullptr || !robot->can_move())
@@ -93,7 +120,7 @@ int World::move_robot(Robot *robot, int new_x, int new_y, int damage, int action
 
     if (check_coords((size_t)new_x, (size_t)new_y))
     {
-        Cell &new_cell = map.get_cell(new_x, new_y);
+        Cell &new_cell = map->get_cell(new_x, new_y);
         if (new_cell.can_walk())
         {
             Robot *other_robot = find_robot(new_x, new_y);
@@ -103,13 +130,13 @@ int World::move_robot(Robot *robot, int new_x, int new_y, int damage, int action
                 robot->set_ap(robot->get_ap() - action_points);
                 if (levels >= 0)
                 {
-                    map.get_cell(new_x, new_y).set_busy(false);
+                    map->get_cell(new_x, new_y).set_busy(false);
                     return levels;
                 }
             }
             else
             {
-                map.get_cell(robot->get_x(), robot->get_y()).set_busy(false);
+                map->get_cell(robot->get_x(), robot->get_y()).set_busy(false);
                 new_cell.set_busy(true);
                 robot->set_coords(new_x, new_y);
                 robot->set_ap(robot->get_ap() - new_cell.get_surface());
@@ -127,7 +154,7 @@ void World::apply_cell_statuses(Robot &robot, int x, int y)
     {
         return;
     }
-    Cell &cell = map.get_cell(x, y);
+    Cell &cell = map->get_cell(x, y);
     int count = cell.get_status_count();
     if (count == 0)
     {
@@ -161,7 +188,7 @@ void World::apply_cell_items(Robot &robot, int x, int y)
     {
         return;
     }
-    Cell &cell = map.get_cell(x, y);
+    Cell &cell = map->get_cell(x, y);
     for (int i = 0; i < ITEM_COUNT; i++)
     {
         ItemType type = (ItemType)i;
@@ -206,13 +233,13 @@ void World::update_vision()
     int vision = player->get_vision();
     int x = player->get_x();
     int y = player->get_y();
-    for (int yi = 0; yi < map.get_height(); yi++)
+    for (int yi = 0; yi < map->get_height(); yi++)
     {
-        for (int xi = 0; xi < map.get_width(); xi++)
+        for (int xi = 0; xi < map->get_width(); xi++)
         {
             if (std::abs(x - xi) + std::abs(y - yi) <= vision)
             {
-                map.get_cell(xi, yi).make_visible();
+                map->get_cell(xi, yi).make_visible();
             }
         }
     }
@@ -220,22 +247,22 @@ void World::update_vision()
 
 void World::set_factory(size_t x, size_t y)
 {
-    if (!(x > 0 && y > 0 && x < (size_t)map.get_width() - 1 &&
-          y < (size_t)map.get_height() - 1))
+    if (!(x > 0 && y > 0 && x < (size_t)map->get_width() - 1 &&
+          y < (size_t)map->get_height() - 1))
     {
         return;
     }
-    if (map.get_cell((int)x, (int)y).if_busy() ||
-        map.get_cell((int)x + 1, (int)y).if_busy() ||
-        map.get_cell((int)x, (int)y + 1).if_busy() ||
-        map.get_cell((int)x + 1, (int)y + 1).if_busy())
+    if (map->get_cell((int)x, (int)y).if_busy() ||
+        map->get_cell((int)x + 1, (int)y).if_busy() ||
+        map->get_cell((int)x, (int)y + 1).if_busy() ||
+        map->get_cell((int)x + 1, (int)y + 1).if_busy())
     {
         return;
     }
-    map.get_cell((int)x, (int)y).set_surface(FACTORY);
-    map.get_cell((int)x + 1, (int)y).set_surface(FACTORY);
-    map.get_cell((int)x, (int)y + 1).set_surface(FACTORY);
-    map.get_cell((int)x + 1, (int)y + 1).set_surface(FACTORY);
+    map->get_cell((int)x, (int)y).set_surface(FACTORY);
+    map->get_cell((int)x + 1, (int)y).set_surface(FACTORY);
+    map->get_cell((int)x, (int)y + 1).set_surface(FACTORY);
+    map->get_cell((int)x + 1, (int)y + 1).set_surface(FACTORY);
 }
 
 void World::spawn_from_factories()
@@ -484,10 +511,10 @@ bool World::all_enemies_dead()
 
 bool World::check_coords(size_t x, size_t y)
 {
-    return map.check_coords(x, y);
+    return map->check_coords(x, y);
 }
 
 Cell &World::get_cell(int x, int y)
 {
-    return map.get_cell(x, y);
+    return map->get_cell(x, y);
 }

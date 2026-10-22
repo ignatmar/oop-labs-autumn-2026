@@ -17,13 +17,17 @@ struct ViewModeState
     bool statuses = false;
 };
 
-const int UI_PANEL_HEIGHT = 200;
-const int UI_ABILITY_SQUARE = 70;
-const int UI_ABILITY_SPACING = 35;
-const int UI_MODE_GAP = 50;
-const int UI_MODE_BUTTON_WIDTH = 120;
-const int UI_MODE_BUTTON_HEIGHT = 38;
-const int UI_MODE_BUTTON_SPACING = 10;
+enum
+{
+    UI_PANEL_HEIGHT = 200,
+    UI_ABILITY_SQUARE = 70,
+    UI_ABILITY_SPACING = 35,
+    UI_MODE_GAP = 50,
+    UI_MODE_BUTTON_WIDTH = 120,
+    UI_MODE_BUTTON_HEIGHT = 38,
+    UI_MODE_BUTTON_SPACING = 10
+};
 
 Rectangle view_mode_button(int index, int screen_width, int panel_y);
+
 void toggle_view_mode(ViewModeState &state, int mode);

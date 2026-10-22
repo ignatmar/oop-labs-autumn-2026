@@ -3,7 +3,6 @@
 #include "item/item.hpp"
 #include "map/map.hpp"
 #include "robot/robot.hpp"
-#include <memory>
 #include <vector>
 
 class Ability;
@@ -12,25 +11,21 @@ class Teleport_ab;
 class World
 {
   private:
-    Map map;
+    Map *map;
     Robot *player;
     std::vector<Robot *> enemies;
-    std::vector<std::unique_ptr<Robot>> owned_enemies;
     std::vector<Factory *> factories;
-    std::vector<std::unique_ptr<Factory>> owned_factories;
     int steps;
 
     Ability *enemy_heal;
     Teleport_ab *teleport;
 
   public:
-    World(Map map);
-    World(const World &other) = delete;
-    World &operator=(const World &other) = delete;
+    World(Map *map);
     ~World();
     void set_player(Robot *robot);
-    void add_enemy(std::unique_ptr<Robot> robot);
-    void add_factory(std::unique_ptr<Factory> factory);
+    void add_enemy(Robot *robot);
+    void add_factory(Factory *factory);
 
     std::vector<Factory *> &get_factories();
 
@@ -38,6 +33,7 @@ class World
 
     Robot *find_robot(int x, int y);
     int move_robot(Robot *robot, int new_x, int new_y, int damage, int action_points);
+    int damage_robot(Robot *attacker, Robot *target, int damage);
     int move_player(int dx, int dy, int action_points);
 
     void update_vision();

@@ -3,54 +3,57 @@
 #include <cstddef>
 #include <vector>
 
+size_t clamp_size(size_t value)
+{
+    if (value < MIN_MAP_SIZE)
+    {
+        return MIN_MAP_SIZE;
+    }
+    if (value > MAX_MAP_SIZE)
+    {
+        return MAX_MAP_SIZE;
+    }
+    return value;
+}
+
+Map::Map(size_t width, size_t height, std::vector<std::vector<char>> tiles)
+    : width(clamp_size(width)), height(clamp_size(height))
+{
+    field.clear();
+    for (size_t i = 0; i < this->height; i++)
+    {
+        std::vector<Cell *> row;
+        for (size_t j = 0; j < this->width; j++)
+        {
+            char symbol = '.';
+            if (i < tiles.size() && j < tiles[i].size())
+            {
+                symbol = tiles[i][j];
+            }
+            row.push_back(new Cell(symbol));
+        }
+        field.push_back(row);
+    }
+}
+
+Map::~Map()
+{
+    for (size_t i = 0; i < field.size(); i++)
+    {
+        for (size_t j = 0; j < field[i].size(); j++)
+        {
+            delete field[i][j];
+        }
+    }
+}
+
 bool Map::check_coords(size_t x, size_t y)
 {
     return (y < height && x < width);
-}
-
-Map::Map(size_t width, size_t height, std::vector<std::vector<char>> field)
-{
-    size_t w = width;
-    size_t h = height;
-    if (w < MIN_MAP_SIZE)
-    {
-        w = MIN_MAP_SIZE;
-    }
-    if (w > MAX_MAP_SIZE)
-    {
-        w = MAX_MAP_SIZE;
-    }
-    if (h < MIN_MAP_SIZE)
-    {
-        h = MIN_MAP_SIZE;
-    }
-    if (h > MAX_MAP_SIZE)
-    {
-        h = MAX_MAP_SIZE;
-    }
-
-    this->width = w;
-    this->height = h;
-
-    this->field.clear();
-    for (size_t i = 0; i < h; i++)
-    {
-        std::vector<Cell> row;
-        for (size_t j = 0; j < w; j++)
-        {
-            char symbol = '.';
-            if (i < field.size() && j < field[i].size())
-            {
-                symbol = field[i][j];
-            }
-            row.emplace_back(symbol);
-        }
-        this->field.push_back(std::move(row));
-    }
 }
 
 int Map::get_width() { return (int)width; }
 
 int Map::get_height() { return (int)height; }
 
-Cell &Map::get_cell(int x, int y) { return field[y][x]; }
+Cell &Map::get_cell(int x, int y) { return *field[y][x]; }

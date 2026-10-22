@@ -16,8 +16,13 @@ void Range_ab::use(Robot &robot, World &world, size_t x, size_t y)
         return;
     }
     Robot *enemy = world.find_robot((int)x, (int)y);
-    world.move_robot(&robot, (int)x, (int)y, damage, 0);
-    if (enemy != nullptr)
+    if (enemy == nullptr)
+    {
+        return;
+    }
+
+    world.damage_robot(&robot, enemy, damage);
+    if (enemy->if_alive())
     {
         enemy->add_status(new Burning(2, 5));
     }

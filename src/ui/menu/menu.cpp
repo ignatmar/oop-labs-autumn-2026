@@ -8,7 +8,7 @@ void Menu::set_message(std::string text)
     message = text;
 }
 
-bool Menu::button(Rectangle rectangle, const char *text)
+bool Menu::button(Rectangle rectangle, std::string text)
 {
     Vector2 mouse = GetMousePosition();
     bool hover = CheckCollisionPointRec(mouse, rectangle);
@@ -16,8 +16,9 @@ bool Menu::button(Rectangle rectangle, const char *text)
     DrawRectangleRec(rectangle, hover ? DARKGRAY : BLACK);
     DrawRectangleLinesEx(rectangle, 2, hover ? WHITE : GRAY);
 
-    int width = MeasureText(text, 24);
-    DrawText(text, (int)(rectangle.x + (rectangle.width - width) / 2),
+    int width = MeasureText(text.c_str(), 24);
+    DrawText(text.c_str(),
+             (int)(rectangle.x + (rectangle.width - width) / 2),
              (int)(rectangle.y + (rectangle.height - 24) / 2), 24, WHITE);
 
     return hover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
